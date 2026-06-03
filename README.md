@@ -4,7 +4,7 @@ Features
 
 Campaign management - design and track supplier outreach programs with response rates, reminders, and escalation triggers
 Supplier tracker - filter by status, region, tier, risk level, and data completeness
-Intelligence dashboard — response trends, tier analysis, campaign performance history
+Intelligence dashboard - response trends, tier analysis, campaign performance history
 Gap analysis - identifies non-responsive suppliers, contact data gaps, and compliance risks with recommended actions
 Escalation management - prioritized list of suppliers requiring immediate action
 
