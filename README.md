@@ -9,5 +9,7 @@ Gap analysis - identifies non-responsive suppliers, contact data gaps, and compl
 Escalation management - prioritized list of suppliers requiring immediate action
 
 Built to reflect real-world supplier communication workflows in global manufacturing supply chains
+
 Tech: HTML, CSS, JavaScript, Chart.js
+
 Live demo: tejaswismandadi.github.io/supplier-comms-intelligence
