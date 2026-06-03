@@ -616,8 +616,6 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
 const SEG = {
   'Critical / P1':{bg:'#FEF2F2',fg:'#991B1B',esc:'7 days'},
@@ -718,4 +716,178 @@ function updateCharts() {
   const qs=['Q3 2025','Q4 2025','Q1 2026','Q2 2026'];
   const rdata=[{l:'N. America',d:[0.82,0.85,0.87,0.89],c:'#378ADD'},{l:'Europe',d:[0.74,0.78,0.80,0.82],c:'#639922'},{l:'Asia Pacific',d:[0.58,0.62,0.68,0.71],c:'#E24B4A'},{l:'India',d:[0.62,0.65,0.70,0.74],c:'#BA7517'},{l:'Mexico',d:[0.79,0.81,0.83,0.85],c:'#7C3AED'}];
   if(trendR)trendR.destroy();
-  trendR=new Chart(document.getElementById('trendRegion'),{type:'line',data:{labels:qs,datasets:rdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{responsive:true,maintainAspectRatio:false,pl
+  trendR=new Chart(document.getElementById('trendRegion'),{type:'line',data:{labels:qs,datasets:rdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{responsive:true,maintainAspectRatio:false,pl,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{min:0.5,max:1,grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v*100)+'%'}}}}});
+  const cdata=[{l:'Regulatory Compliance',d:[0.72,0.78,0.82,0.86],c:'#378ADD'},{l:'Risk Assessment',d:[0.68,0.74,0.79,0.82],c:'#639922'},{l:'Corrective Action',d:[0.85,0.88,0.91,0.93],c:'#E24B4A'},{l:'Contact Verification',d:[0.78,0.82,0.85,0.87],c:'#BA7517'}];
+  if(trendC)trendC.destroy();
+  trendC=new Chart(document.getElementById('trendCamp'),{type:'line',data:{labels:qs,datasets:cdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{min:0.6,max:1,grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v*100)+'%'}}}}});
+}
+
+function updateGap() {
+  const el=document.getElementById('gap-analysis');
+  const esc=suppliers.filter(s=>s.status==='Escalated'), wl=suppliers.filter(s=>s.segment==='Watch List'), noEmail=suppliers.filter(s=>!s.email);
+  const total=suppliers.length, resp=suppliers.filter(s=>s.status==='Responded').length, rate=total?Math.round(resp/total*100):0;
+  let h='';
+  if(esc.length)h+=`<div class="irow"><div class="adot" style="background:#E24B4A"></div><div><div style="font-size:13px;font-weight:500">${esc.length} supplier${esc.length>1?'s':''} escalated — category manager action required immediately</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${esc.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(wl.length)h+=`<div class="irow"><div class="adot" style="background:#7C3AED"></div><div><div style="font-size:13px;font-weight:500">${wl.length} Watch List supplier${wl.length>1?'s':''} — financial risk flag or repeated performance failures</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Review REI scores. Consider alternate sourcing: ${wl.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(noEmail.length)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">${noEmail.length} supplier${noEmail.length>1?'s':''} missing contact email — outreach will bounce</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${noEmail.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(rate<85&&total>0)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">Response rate ${rate}% is below 85% target — ${total-resp} suppliers still pending</div><div style="font-size:12px;color:var(--text2);margin-top:2px">P1 suppliers escalate after 7 days. P2 after 14 days. Check escalation log for overdue suppliers.</div></div></div>`;
+  if(!h)h='<div style="padding:1rem 0;font-size:13px;color:var(--text2)">No critical gaps. Response rates and data completeness look good.</div>';
+  el.innerHTML=h;
+}
+
+function renderActivity() {
+  const el=document.getElementById('activity-log');
+  el.innerHTML=activity.slice(0,6).map(a=>`<div class="irow"><div class="adot" style="background:${a.color}"></div><div><div style="font-size:13px">${a.msg}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">${a.time}</div></div></div>`).join('');
+}
+
+function renderREI() {
+  document.getElementById('rei-tbody').innerHTML=suppliers.map((s,i)=>{
+    const {bg,fg}=SEG[s.segment]||{};
+    const rb=s.rei>4?'#FEF2F2':s.rei>0?'#FFFBEB':'#F0FDF4', rf=s.rei>4?'#991B1B':s.rei>0?'#92400E':'#14532D';
+    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="text-align:center">${s.ttr}</td><td style="text-align:center">${s.tts}</td><td style="text-align:center;font-weight:500;background:${rb};color:${rf}">${s.rei}</td><td style="text-align:center">${s.single||'No'}</td><td style="text-align:center">$${(+s.spend).toLocaleString()}K</td><td style="text-align:center">${s.fin||'No'}</td><td style="text-align:center;font-weight:500;color:#0D9488">${s.comp}</td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="text-align:center;font-size:11px;font-weight:500;color:${fg}">${s.esc}</td></tr>`;
+  }).join('');
+}
+
+function renderSup(list) {
+  document.getElementById('sup-tbody').innerHTML=(list||suppliers).map(s=>{
+    const {bg,fg}=SEG[s.segment]||{};
+    const eb=!s.email?'var(--redbg)':'transparent', ef=!s.email?'var(--redtext)':'var(--text)';
+    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px">${s.tier}</td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.contact||'—'}</td><td style="font-size:11px;background:${eb};color:${ef}">${s.email||'⚠ MISSING'}</td><td style="font-size:11px">${s.portal||'—'}</td><td style="font-size:11px;font-weight:500;color:${fg}">${s.esc}</td></tr>`;
+  }).join('');
+}
+
+function filterSup(val) {
+  renderSup(val==='all'?suppliers:suppliers.filter(s=>s.segment===val));
+}
+
+function renderCampaigns() {
+  const el=document.getElementById('campaigns-list');
+  if(!campaigns.length){el.innerHTML='<div class="empty"><i class="ti ti-speakerphone"></i><p>No campaigns yet</p></div>';return;}
+  const resp=suppliers.filter(s=>s.status==='Responded').length, total=suppliers.length||1;
+  const rate=Math.round(resp/total*100), pend=suppliers.filter(s=>s.status==='Pending').length;
+  el.innerHTML=campaigns.map((c,ci)=>`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div><div style="font-size:14px;font-weight:500">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.type} · Due ${c.due} · ${c.priority} priority</div>${c.desc?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${c.desc}</div>`:''}</div>
+      <span class="badge ${c.status==='active'?'ba':'bg'}">${c.status==='active'?'In progress':'Completed'}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Response rate</div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="height:100%;width:${rate}%;background:${rate>=80?'var(--green)':rate>=50?'var(--amber)':'var(--red)'};border-radius:4px"></div></div><div style="font-size:11px;color:var(--text2);margin-top:3px">${rate}% (${resp} of ${total} suppliers)</div></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center">
+        <div style="background:var(--greenbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--greentext)">${resp}</div><div style="font-size:9px;color:var(--greentext)">Responded</div></div>
+        <div style="background:var(--amberbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--ambertext)">${pend}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
+        <div style="background:var(--redbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--redtext)">${suppliers.filter(s=>s.status==='Escalated').length}</div><div style="font-size:9px;color:var(--redtext)">Escalated</div></div>
+      </div>
+    </div>
+    <div style="border-top:0.5px solid var(--border);padding-top:10px">
+      <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Update supplier status — change dropdown as suppliers submit data:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+        ${suppliers.map((s,si)=>{
+          const {fg}=SEG[s.segment]||{fg:'#333'};
+          const sBg=s.status==='Responded'?'var(--greenbg)':s.status==='Escalated'?'var(--redbg)':'var(--amberbg)';
+          const sFg=s.status==='Responded'?'var(--greentext)':s.status==='Escalated'?'var(--redtext)':'var(--ambertext)';
+          return `<div style="display:flex;align-items:center;gap:4px;background:var(--bg2);border-radius:6px;padding:3px 8px 3px 3px">
+            <select onchange="updateStatus(${si},this.value)" style="font-size:10px;padding:1px 4px;background:${sBg};color:${sFg};font-weight:500;border:none;border-radius:4px;width:auto;cursor:pointer">
+              <option ${s.status==='Pending'?'selected':''}>Pending</option>
+              <option ${s.status==='Responded'?'selected':''}>Responded</option>
+              <option ${s.status==='Escalated'?'selected':''}>Escalated</option>
+            </select>
+            <span style="font-size:10px;color:var(--text2)">${s.name.split(' ')[0]}</span>
+            <span style="font-size:9px;color:${SEG[s.segment]?.fg||'#666'}">${s.esc}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+function renderEsc() {
+  const el=document.getElementById('esc-list');
+  const esc=suppliers.filter(s=>s.status==='Escalated');
+  if(!esc.length){el.innerHTML='<div class="empty"><i class="ti ti-alert-triangle"></i><p>No escalations. Suppliers marked Escalated populate here automatically.</p></div>';return;}
+  el.innerHTML=`<div class="card" style="padding:0;overflow:hidden"><table>
+    <thead><tr><th>Supplier</th><th>Segment</th><th>Region</th><th>Email</th><th>Esc Window</th><th>Action</th></tr></thead>
+    <tbody>${esc.map(s=>{
+      const i=suppliers.indexOf(s);
+      const {bg,fg}=SEG[s.segment]||{};
+      return `<tr><td><strong style="color:var(--redtext)">${s.name}</strong></td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px;color:${!s.email?'var(--redtext)':'var(--text)'}">${s.email||'No email'}</td><td style="font-size:11px;font-weight:500;color:var(--redtext)">${s.esc}</td><td><button class="btn" style="font-size:11px;padding:3px 8px" onclick="updateStatus(${i},'Responded')">Mark responded</button></td></tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+function updateStatus(i, val) {
+  const old=suppliers[i].status;
+  suppliers[i].status=val;
+  activity.unshift({msg:`${suppliers[i].name}: status changed from ${old} to ${val}`,color:val==='Responded'?'#639922':val==='Escalated'?'#E24B4A':'#BA7517',time:new Date().toLocaleString()});
+  updateAll();
+}
+
+function saveREISupplier() {
+  const name=document.getElementById('rs-name').value.trim();
+  if(!name){alert('Supplier name required');return;}
+  const s={name,region:document.getElementById('rs-region').value,tier:document.getElementById('rs-tier').value,spend:document.getElementById('rs-spend').value,ttr:document.getElementById('rs-ttr').value,tts:document.getElementById('rs-tts').value,single:document.getElementById('rs-single').value,fin:document.getElementById('rs-fin').value,perf:document.getElementById('rs-perf').value,email:document.getElementById('rs-email').value.trim(),contact:document.getElementById('rs-contact').value.trim(),portal:document.getElementById('rs-portal').value,status:'Pending'};
+  const {rei,comp,seg,esc}=calcREI(s);
+  suppliers.push({...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei,comp,segment:seg,esc});
+  activity.unshift({msg:`REI scored: ${name} — ${seg} (REI: ${rei}, Score: ${comp})`,color:'#0D9488',time:new Date().toLocaleString()});
+  closeModal('rei_supplier');
+  updateAll();
+  ['rs-name','rs-spend','rs-ttr','rs-tts','rs-email','rs-contact'].forEach(id=>document.getElementById(id).value='');
+}
+
+function saveCampaign() {
+  const name=document.getElementById('c-name').value.trim(), due=document.getElementById('c-due').value;
+  if(!name||!due){alert('Campaign name and due date required');return;}
+  campaigns.push({id:Date.now(),name,type:document.getElementById('c-type').value,due,priority:document.getElementById('c-pri').value,desc:document.getElementById('c-desc').value.trim(),status:'active',created:new Date().toLocaleDateString()});
+  activity.unshift({msg:`Campaign launched: "${name}" targeting ${suppliers.length} suppliers`,color:'#378ADD',time:new Date().toLocaleString()});
+  closeModal('campaign');
+  ['c-name','c-desc','c-due'].forEach(id=>document.getElementById(id).value='');
+  updateAll();
+}
+
+function importCSV(input) {
+  const file=input.files[0];if(!file)return;
+  Papa.parse(file,{header:true,skipEmptyLines:true,complete:function(r){
+    let added=0;
+    r.data.forEach(row=>{
+      const name=(row['Name']||'').trim();if(!name)return;
+      const s={name,region:row['Region']||'Other',tier:row['Tier']||'Tier 2',spend:row['Spend ($K)']||'0',ttr:row['TTR']||'4',tts:row['TTS']||'2',single:row['Single Source']||'No',fin:row['Financial Risk']||'No',perf:row['Performance']||'3',contact:row['Contact Name']||'',email:row['Contact Email']||'',portal:row['Portal Status']||'Pending',status:'Pending'};
+      const {rei,comp,seg,esc}=calcREI(s);
+      suppliers.push({...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei,comp,segment:seg,esc});
+      added++;
+    });
+    input.value='';
+    activity.unshift({msg:`CSV import: ${added} suppliers imported and REI-scored`,color:'#639922',time:new Date().toLocaleString()});
+    updateAll();
+    document.getElementById('import-result').innerHTML=`<div style="background:var(--greenbg);color:var(--greentext);padding:10px 14px;border-radius:var(--r);font-size:13px">${added} suppliers imported successfully</div>`;
+  }});
+}
+
+function downloadSample() {
+  const csv=`Name,Region,Tier,TTR,TTS,Single Source,Spend ($K),Financial Risk,Performance,Contact Name,Contact Email,Portal Status
+Bosch GmbH,Europe,Tier 1,12,2,Yes,8500,No,5,Anna Muller,a.muller@bosch.com,Registered
+BorgWarner,N. America,Tier 1,16,2,Yes,6200,No,5,Steve Hunt,s.hunt@borgwarner.com,Registered
+Magna International,N. America,Tier 1,6,4,No,4200,No,4,John Smith,j.smith@magna.com,Registered
+Tata Steel,India,Tier 2,10,3,No,850,No,3,Raj Patel,r.patel@tata.com,Pending
+Foshan Manufacturing,Asia Pacific,Tier 2,20,1,No,320,Yes,2,Wei Zhang,,Not Registered`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='supplier-template.csv';a.click();
+}
+
+function openModal(t){var el=document.getElementById('modal-'+t);if(el){el.style.display='';el.classList.add('open');}}
+function showPage(n,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  if(el)el.classList.add('active');
+  updateAll();
+}
+function toggleHelp(el){
+  el.classList.toggle('open');
+  const icon=el.querySelector('.ti-chevron-down');
+  if(icon)icon.style.transform=el.classList.contains('open')?'rotate(180deg)':'';
+}
+
+window.addEventListener('load', function() {
+  updateAll();
+});
+</script>
+</body>
+</html>
