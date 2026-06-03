@@ -6,136 +6,140 @@
 <title>Supplier Communications & Intelligence Platform</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #ffffff; --bg2: #f5f5f4; --bg3: #eeede8;
-    --text: #1a1a1a; --text2: #6b6b6b; --text3: #9a9a9a;
-    --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
-    --blue: #378ADD; --blue-bg: #E6F1FB; --blue-text: #0C447C;
-    --green: #639922; --green-bg: #EAF3DE; --green-text: #27500A;
-    --amber: #BA7517; --amber-bg: #FAEEDA; --amber-text: #633806;
-    --red: #E24B4A; --red-bg: #FCEBEB; --red-text: #791F1F;
-    --radius: 8px; --radius-lg: 12px;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeede8;
+  --text:#1a1a1a;--text2:#6b6b6b;--text3:#9a9a9a;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.2);
+  --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+  --green:#639922;--green-bg:#EAF3DE;--green-text:#27500A;
+  --amber:#BA7517;--amber-bg:#FAEEDA;--amber-text:#633806;
+  --red:#E24B4A;--red-bg:#FCEBEB;--red-text:#791F1F;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;
+    --text:#f0efea;--text2:#a8a89e;--text3:#6e6e66;
+    --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2);
+    --blue:#85B7EB;--blue-bg:#042C53;--blue-text:#B5D4F4;
+    --green:#97C459;--green-bg:#173404;--green-text:#C0DD97;
+    --amber:#EF9F27;--amber-bg:#412402;--amber-text:#FAC775;
+    --red:#F09595;--red-bg:#501313;--red-text:#F7C1C1;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
-      --text: #f0efea; --text2: #a8a89e; --text3: #6e6e66;
-      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.18);
-      --blue: #85B7EB; --blue-bg: #042C53; --blue-text: #B5D4F4;
-      --green: #97C459; --green-bg: #173404; --green-text: #C0DD97;
-      --amber: #EF9F27; --amber-bg: #412402; --amber-text: #FAC775;
-      --red: #F09595; --red-bg: #501313; --red-text: #F7C1C1;
-    }
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
-  .topbar { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .topbar-brand { display: flex; align-items: center; gap: 10px; }
-  .topbar-logo { width: 32px; height: 32px; background: var(--blue); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
-  .topbar-title { font-size: 15px; font-weight: 500; }
-  .topbar-sub { font-size: 12px; color: var(--text2); margin-top: 1px; }
-  .topbar-right { display: flex; align-items: center; gap: 12px; }
-  .topbar-badge { font-size: 11px; background: var(--green-bg); color: var(--green-text); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
-  .layout { display: flex; min-height: calc(100vh - 56px); }
-  .sidebar { width: 200px; background: var(--bg); border-right: 0.5px solid var(--border); padding: 1.5rem 0; flex-shrink: 0; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto; }
-  .nav-section { font-size: 10px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 1.25rem; margin-bottom: 6px; margin-top: 1.5rem; }
-  .nav-section:first-child { margin-top: 0; }
-  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 1.25rem; font-size: 13px; cursor: pointer; color: var(--text2); border-left: 2px solid transparent; transition: all 0.15s; }
-  .nav-item:hover { background: var(--bg2); color: var(--text); }
-  .nav-item.active { color: var(--text); background: var(--bg2); border-left-color: var(--text); font-weight: 500; }
-  .nav-item i { font-size: 15px; }
-  .nav-badge { margin-left: auto; font-size: 10px; background: var(--red-bg); color: var(--red-text); padding: 1px 6px; border-radius: 10px; font-weight: 600; }
-  .nav-badge.green { background: var(--green-bg); color: var(--green-text); }
-  .main { flex: 1; padding: 1.5rem 2rem; overflow-y: auto; }
-  .page { display: none; }
-  .page.active { display: block; }
-  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-  .page-title { font-size: 20px; font-weight: 500; }
-  .page-sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; font-size: 13px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: none; cursor: pointer; color: var(--text); transition: background 0.15s; }
-  .btn:hover { background: var(--bg2); }
-  .btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .btn.primary:hover { opacity: 0.85; }
-  .btn i { font-size: 14px; }
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
-  .metric { background: var(--bg); border-radius: var(--radius); padding: 14px 16px; border: 0.5px solid var(--border); }
-  .metric-label { font-size: 11px; color: var(--text2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .metric-value { font-size: 26px; font-weight: 500; line-height: 1; }
-  .metric-value.g { color: var(--green); }
-  .metric-value.a { color: var(--amber); }
-  .metric-value.r { color: var(--red); }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
-  .card-title { font-size: 13px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .badge-g { background: var(--green-bg); color: var(--green-text); }
-  .badge-a { background: var(--amber-bg); color: var(--amber-text); }
-  .badge-r { background: var(--red-bg); color: var(--red-text); }
-  .badge-b { background: var(--blue-bg); color: var(--blue-text); }
-  .row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
-  .row:last-child { border-bottom: none; }
-  .progress-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; margin: 8px 0 4px; }
-  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-  .chart-wrap { position: relative; height: 220px; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; padding: 8px 12px; border-bottom: 0.5px solid var(--border); }
-  td { padding: 10px 12px; border-bottom: 0.5px solid var(--border); vertical-align: middle; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--bg2); }
-  .risk-dots { display: flex; gap: 3px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border2); }
-  .dot.r { background: var(--red); }
-  .dot.a { background: var(--amber); }
-  .dot.g { background: var(--green); }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  .form-label { font-size: 12px; color: var(--text2); font-weight: 500; }
-  input, select, textarea { padding: 7px 10px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 13px; background: var(--bg); color: var(--text); width: 100%; }
-  input:focus, select:focus { outline: none; border-color: var(--blue); }
-  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; }
-  .modal-backdrop.open { display: flex; }
-  .modal { background: var(--bg); border-radius: var(--radius-lg); padding: 1.5rem; width: 500px; max-width: 95vw; border: 0.5px solid var(--border); }
-  .modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
-  .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-  .intel-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid var(--border); }
-  .intel-row:last-child { border-bottom: none; }
-  @media (max-width: 700px) {
-    .sidebar { display: none; }
-    .main { padding: 1rem; }
-    .grid2 { grid-template-columns: 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
-  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;font-size:14px;}
+.topbar{background:var(--bg);border-bottom:0.5px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-logo{width:30px;height:30px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;}
+.brand-title{font-size:14px;font-weight:500;}
+.brand-sub{font-size:11px;color:var(--text2);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.live-badge{font-size:11px;background:var(--green-bg);color:var(--green-text);padding:3px 9px;border-radius:20px;font-weight:500;}
+.layout{display:flex;min-height:calc(100vh - 54px);}
+.sidebar{width:190px;background:var(--bg);border-right:0.5px solid var(--border);padding:1rem 0;flex-shrink:0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;}
+.nav-section{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:1rem 0 4px;}
+.nav-section:first-child{margin-top:0;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 1rem;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;}
+.nav-item:hover{background:var(--bg2);color:var(--text);}
+.nav-item.active{color:var(--text);background:var(--bg2);border-left-color:var(--text);font-weight:500;}
+.nav-item i{font-size:15px;}
+.nbadge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600;}
+.nbadge-r{background:var(--red-bg);color:var(--red-text);}
+.nbadge-g{background:var(--green-bg);color:var(--green-text);}
+.main{flex:1;padding:1.25rem 1.5rem;overflow-y:auto;}
+.page{display:none;}
+.page.active{display:block;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;}
+.page-title{font-size:18px;font-weight:500;}
+.page-sub{font-size:12px;color:var(--text2);margin-top:2px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:none;cursor:pointer;color:var(--text);}
+.btn:hover{background:var(--bg2);}
+.btn.primary{background:var(--text);color:var(--bg);border-color:var(--text);}
+.btn.primary:hover{opacity:.85;}
+.btn.danger{background:var(--red-bg);color:var(--red-text);border-color:var(--red);}
+.btn i{font-size:13px;}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1.25rem;}
+.metric{background:var(--bg);border-radius:var(--radius);padding:12px 14px;border:0.5px solid var(--border);}
+.metric-label{font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.metric-value{font-size:24px;font-weight:500;line-height:1;}
+.metric-value.g{color:var(--green);}
+.metric-value.a{color:var(--amber);}
+.metric-value.r{color:var(--red);}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:3px;}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1rem;}
+.card-title{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem;}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;}
+.bg{background:var(--green-bg);color:var(--green-text);}
+.ba{background:var(--amber-bg);color:var(--amber-text);}
+.br{background:var(--red-bg);color:var(--red-text);}
+.bb{background:var(--blue-bg);color:var(--blue-text);}
+.progress-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0 3px;}
+.progress-fill{height:100%;border-radius:3px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.chart-wrap{position:relative;height:200px;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:0.5px solid var(--border);}
+td{padding:9px 10px;border-bottom:0.5px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--bg2);}
+input,select,textarea{padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:12px;background:var(--bg);color:var(--text);width:100%;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-label{font-size:11px;color:var(--text2);font-weight:500;}
+.modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.25rem;width:480px;max-width:95vw;border:0.5px solid var(--border);max-height:90vh;overflow-y:auto;}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:1rem;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px;}
+.row:last-child{border-bottom:none;}
+.intel-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.intel-row:last-child{border-bottom:none;}
+.activity-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--text2);}
+.empty-state i{font-size:40px;color:var(--text3);margin-bottom:.75rem;display:block;}
+.empty-state p{font-size:13px;}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer;color:var(--text2);}
+.upload-zone:hover{background:var(--bg2);}
+.upload-zone i{font-size:32px;display:block;margin-bottom:.5rem;color:var(--text3);}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:var(--bg2);color:var(--text2);margin-right:3px;}
+.help-banner{background:var(--blue-bg);color:var(--blue-text);border-radius:var(--radius);padding:10px 14px;font-size:12px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:8px;}
+.help-banner i{font-size:16px;flex-shrink:0;margin-top:1px;}
+@media(max-width:700px){.sidebar{display:none;}.main{padding:1rem;}.grid2{grid-template-columns:1fr;}.form-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-logo"><i class="ti ti-network"></i></div>
+  <div class="brand">
+    <div class="brand-logo"><i class="ti ti-network"></i></div>
     <div>
-      <div class="topbar-title">Supplier Comms & Intelligence</div>
-      <div class="topbar-sub">Global Supply Base · 847 suppliers · 23 countries</div>
+      <div class="brand-title">Supplier Comms & Intelligence</div>
+      <div class="brand-sub" id="topbar-sub">0 suppliers · 0 campaigns</div>
     </div>
   </div>
   <div class="topbar-right">
-    <span class="topbar-badge"><i class="ti ti-circle-check" style="font-size:11px;"></i> Live</span>
-    <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i> New campaign</button>
+    <span class="live-badge"><i class="ti ti-circle-check" style="font-size:10px;"></i> Live</span>
+    <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
   </div>
 </div>
 
 <div class="layout">
   <nav class="sidebar">
     <div class="nav-section">Main</div>
-    <div class="nav-item active" onclick="showPage('overview', this)"><i class="ti ti-layout-dashboard"></i> Overview</div>
-    <div class="nav-item" onclick="showPage('campaigns', this)"><i class="ti ti-speakerphone"></i> Campaigns <span class="nav-badge green">4</span></div>
-    <div class="nav-item" onclick="showPage('suppliers', this)"><i class="ti ti-building-factory"></i> Suppliers</div>
-    <div class="nav-item" onclick="showPage('intelligence', this)"><i class="ti ti-chart-bar"></i> Intelligence</div>
+    <div class="nav-item active" onclick="showPage('overview',this)"><i class="ti ti-layout-dashboard"></i> Overview</div>
+    <div class="nav-item" onclick="showPage('campaigns',this)"><i class="ti ti-speakerphone"></i> Campaigns <span class="nbadge nbadge-g" id="nav-campaigns-badge">0</span></div>
+    <div class="nav-item" onclick="showPage('suppliers',this)"><i class="ti ti-building-factory"></i> Suppliers <span class="nbadge nbadge-g" id="nav-suppliers-badge">0</span></div>
+    <div class="nav-item" onclick="showPage('intelligence',this)"><i class="ti ti-chart-bar"></i> Intelligence</div>
     <div class="nav-section">Actions</div>
-    <div class="nav-item" onclick="showPage('escalations', this)"><i class="ti ti-alert-triangle"></i> Escalations <span class="nav-badge">8</span></div>
-    <div class="nav-item" onclick="showPage('contacts', this)"><i class="ti ti-address-book"></i> Contact data</div>
+    <div class="nav-item" onclick="showPage('escalations',this)"><i class="ti ti-alert-triangle"></i> Escalations <span class="nbadge nbadge-r" id="nav-esc-badge">0</span></div>
+    <div class="nav-item" onclick="showPage('import',this)"><i class="ti ti-upload"></i> Import data</div>
+    <div class="nav-section">Help</div>
+    <div class="nav-item" onclick="showPage('guide',this)"><i class="ti ti-book"></i> How to use</div>
   </nav>
 
   <main class="main">
@@ -143,304 +147,734 @@
     <!-- OVERVIEW -->
     <div id="page-overview" class="page active">
       <div class="page-header">
-        <div><div class="page-title">Overview</div><div class="page-sub">Last updated: Jun 3, 2026 · Q2 compliance cycle active</div></div>
+        <div><div class="page-title">Overview</div><div class="page-sub" id="overview-sub">Add suppliers and create campaigns to get started</div></div>
       </div>
       <div class="metrics">
-        <div class="metric"><div class="metric-label">Response rate</div><div class="metric-value g">78%</div><div class="metric-sub">+6% vs Q1</div></div>
-        <div class="metric"><div class="metric-label">Active campaigns</div><div class="metric-value">4</div><div class="metric-sub">1 closing Jun 30</div></div>
-        <div class="metric"><div class="metric-label">Non-responsive</div><div class="metric-value a">31</div><div class="metric-sub">Reminder sent</div></div>
-        <div class="metric"><div class="metric-label">Escalations</div><div class="metric-value r">8</div><div class="metric-sub">Require action</div></div>
-        <div class="metric"><div class="metric-label">Data complete</div><div class="metric-value g">91%</div><div class="metric-sub">Target: 95%</div></div>
-        <div class="metric"><div class="metric-label">Contact accuracy</div><div class="metric-value a">87%</div><div class="metric-sub">23 gaps</div></div>
+        <div class="metric"><div class="metric-label">Total suppliers</div><div class="metric-value" id="m-total">0</div><div class="metric-sub">across all regions</div></div>
+        <div class="metric"><div class="metric-label">Response rate</div><div class="metric-value g" id="m-rate">0%</div><div class="metric-sub" id="m-rate-sub">no campaigns yet</div></div>
+        <div class="metric"><div class="metric-label">Non-responsive</div><div class="metric-value a" id="m-pending">0</div><div class="metric-sub">awaiting response</div></div>
+        <div class="metric"><div class="metric-label">Escalations</div><div class="metric-value r" id="m-esc">0</div><div class="metric-sub">require action</div></div>
+        <div class="metric"><div class="metric-label">Active campaigns</div><div class="metric-value" id="m-campaigns">0</div><div class="metric-sub">in progress</div></div>
+        <div class="metric"><div class="metric-label">Data complete</div><div class="metric-value g" id="m-complete">0%</div><div class="metric-sub">of supplier records</div></div>
       </div>
       <div class="grid2">
         <div class="card">
           <div class="card-title">Response rate by region</div>
-          <div class="chart-wrap"><canvas id="regionChart" role="img" aria-label="Bar chart of supplier response rates by region. North America 89%, Europe 82%, Asia Pacific 71%, India 74%, Mexico 85%.">North America 89%, Europe 82%, Asia Pacific 71%, India 74%, Mexico 85%.</canvas></div>
+          <div class="chart-wrap"><canvas id="regionChart" role="img" aria-label="Bar chart showing response rate by region.">Response rate by region.</canvas></div>
         </div>
         <div class="card">
-          <div class="card-title">6-month trend</div>
-          <div class="chart-wrap"><canvas id="trendChart" role="img" aria-label="Line chart showing response rate trend from January to June 2026 increasing from 61% to 78%.">Response rate trend Jan-Jun 2026: 61%, 65%, 70%, 74%, 76%, 78%.</canvas></div>
+          <div class="card-title">Suppliers by status</div>
+          <div class="chart-wrap"><canvas id="statusChart" role="img" aria-label="Doughnut chart showing supplier response status breakdown.">Supplier status breakdown.</canvas></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">Recent activity</div>
-        <div class="intel-row"><div class="activity-dot" style="background:var(--amber);"></div><div><div style="font-size:13px;">Q2 Compliance — reminder sent to 31 non-responsive suppliers</div><div style="font-size:11px; color:var(--text3); margin-top:2px;">2 hours ago · Automated</div></div></div>
-        <div class="intel-row"><div class="activity-dot" style="background:var(--green);"></div><div><div style="font-size:13px;">Yanfeng DE updated contact data — 3 new contacts verified</div><div style="font-size:11px; color:var(--text3); margin-top:2px;">5 hours ago · Supplier action</div></div></div>
-        <div class="intel-row"><div class="activity-dot" style="background:var(--amber);"></div><div><div style="font-size:13px;">3 suppliers flagged for missing CO2 emissions data</div><div style="font-size:11px; color:var(--text3); margin-top:2px;">1 day ago · System alert</div></div></div>
-        <div class="intel-row"><div class="activity-dot" style="background:var(--green);"></div><div><div style="font-size:13px;">Annual Risk Assessment closed — 94% response rate achieved</div><div style="font-size:11px; color:var(--text3); margin-top:2px;">2 days ago · Campaign closed</div></div></div>
-        <div class="intel-row"><div class="activity-dot" style="background:var(--red);"></div><div><div style="font-size:13px;">Foshan Mfg CN escalated — no response in 42 days</div><div style="font-size:11px; color:var(--text3); margin-top:2px;">3 days ago · Escalation triggered</div></div></div>
+        <div class="card-title">Activity log</div>
+        <div id="activity-log">
+          <div class="empty-state"><i class="ti ti-clock"></i><p>Activity will appear here as you add suppliers and run campaigns</p></div>
+        </div>
       </div>
     </div>
 
     <!-- CAMPAIGNS -->
     <div id="page-campaigns" class="page">
       <div class="page-header">
-        <div><div class="page-title">Campaigns</div><div class="page-sub">Manage global supplier outreach programs</div></div>
-        <button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i> New campaign</button>
+        <div><div class="page-title">Campaigns</div><div class="page-sub">Design and track supplier outreach programs</div></div>
+        <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
       </div>
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-          <div><div style="font-size:15px; font-weight:500;">Q2 Compliance Data Collection</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Compliance data · All active suppliers · Due Jun 30, 2026</div></div>
-          <span class="badge badge-a">In progress</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:78%; background:var(--green);"></div></div>
-        <div style="font-size:11px; color:var(--text2); margin-bottom:12px;">78% responded · 31 non-responsive · 2 escalated</div>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center; border-top: 0.5px solid var(--border); padding-top:12px;">
-          <div><div style="font-size:18px; font-weight:500;">847</div><div style="font-size:11px; color:var(--text2);">Sent</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--green);">661</div><div style="font-size:11px; color:var(--text2);">Responded</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--amber);">31</div><div style="font-size:11px; color:var(--text2);">Pending</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--red);">8</div><div style="font-size:11px; color:var(--text2);">Escalated</div></div>
-        </div>
-      </div>
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-          <div><div style="font-size:15px; font-weight:500;">Annual Supplier Risk Assessment</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Risk assessment · Tier 1 suppliers · Closed May 1, 2026</div></div>
-          <span class="badge badge-g">Completed</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:94%; background:var(--green);"></div></div>
-        <div style="font-size:11px; color:var(--text2); margin-bottom:12px;">94% responded · Target exceeded</div>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center; border-top: 0.5px solid var(--border); padding-top:12px;">
-          <div><div style="font-size:18px; font-weight:500;">203</div><div style="font-size:11px; color:var(--text2);">Sent</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--green);">191</div><div style="font-size:11px; color:var(--text2);">Responded</div></div>
-          <div><div style="font-size:18px; font-weight:500;">12</div><div style="font-size:11px; color:var(--text2);">No response</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--green);">94%</div><div style="font-size:11px; color:var(--text2);">Rate</div></div>
-        </div>
-      </div>
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-          <div><div style="font-size:15px; font-weight:500;">Contact Database Verification</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Contact verification · All suppliers · Due Jul 15, 2026</div></div>
-          <span class="badge badge-b">Scheduled</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" style="width:12%; background:var(--blue);"></div></div>
-        <div style="font-size:11px; color:var(--text2); margin-bottom:12px;">12% complete · Launches Jun 15</div>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center; border-top: 0.5px solid var(--border); padding-top:12px;">
-          <div><div style="font-size:18px; font-weight:500;">847</div><div style="font-size:11px; color:var(--text2);">Target</div></div>
-          <div><div style="font-size:18px; font-weight:500; color:var(--green);">101</div><div style="font-size:11px; color:var(--text2);">Verified</div></div>
-          <div><div style="font-size:18px; font-weight:500;">746</div><div style="font-size:11px; color:var(--text2);">Pending</div></div>
-          <div><div style="font-size:18px; font-weight:500;">42d</div><div style="font-size:11px; color:var(--text2);">Remaining</div></div>
-        </div>
+      <div id="campaigns-list">
+        <div class="empty-state"><i class="ti ti-speakerphone"></i><p>No campaigns yet. Create your first campaign to start tracking supplier outreach.</p></div>
       </div>
     </div>
 
     <!-- SUPPLIERS -->
     <div id="page-suppliers" class="page">
       <div class="page-header">
-        <div><div class="page-title">Suppliers</div><div class="page-sub">847 active suppliers across 23 countries</div></div>
-        <div style="display:flex; gap:8px;">
-          <select style="width:auto; font-size:12px;" onchange="filterTable(this.value)">
+        <div><div class="page-title">Suppliers</div><div class="page-sub" id="suppliers-sub">Manage your global supply base</div></div>
+        <div style="display:flex;gap:8px;">
+          <select style="width:auto;font-size:12px;" onchange="filterSuppliers(this.value)" id="status-filter">
             <option value="all">All statuses</option>
-            <option value="responded">Responded</option>
-            <option value="pending">Pending</option>
-            <option value="escalated">Escalated</option>
+            <option value="Responded">Responded</option>
+            <option value="Pending">Pending</option>
+            <option value="Escalated">Escalated</option>
           </select>
-          <select style="width:auto; font-size:12px;">
-            <option>All regions</option>
-            <option>N. America</option>
-            <option>Europe</option>
-            <option>Asia Pacific</option>
-            <option>India</option>
-            <option>Mexico</option>
+          <select style="width:auto;font-size:12px;" onchange="filterByRegion(this.value)" id="region-filter">
+            <option value="all">All regions</option>
           </select>
+          <button class="btn primary" onclick="openModal('supplier')"><i class="ti ti-plus"></i> Add supplier</button>
         </div>
       </div>
-      <div class="card" style="padding:0; overflow:hidden;">
-        <table id="supplierTable">
-          <thead><tr>
-            <th>Supplier</th><th>Region</th><th>Tier</th><th>Last contact</th><th>Status</th><th>Risk level</th><th>Data complete</th>
-          </tr></thead>
-          <tbody>
-            <tr data-status="responded"><td><strong>Magna International</strong><br><span style="font-size:11px; color:var(--text2);">Plastics & Interiors</span></td><td>N. America</td><td>Tier 1</td><td>Jun 1, 2026</td><td><span class="badge badge-g">Responded</span></td><td><div class="risk-dots"><div class="dot g"></div><div class="dot g"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></td><td>100%</td></tr>
-            <tr data-status="responded"><td><strong>Bosch GmbH DE</strong><br><span style="font-size:11px; color:var(--text2);">Electronics</span></td><td>Europe</td><td>Tier 1</td><td>May 28, 2026</td><td><span class="badge badge-g">Responded</span></td><td><div class="risk-dots"><div class="dot g"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></td><td>98%</td></tr>
-            <tr data-status="responded"><td><strong>Yanfeng DE</strong><br><span style="font-size:11px; color:var(--text2);">Interiors</span></td><td>Europe</td><td>Tier 1</td><td>Jun 3, 2026</td><td><span class="badge badge-g">Responded</span></td><td><div class="risk-dots"><div class="dot g"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></td><td>95%</td></tr>
-            <tr data-status="responded"><td><strong>Grupo Antolin MX</strong><br><span style="font-size:11px; color:var(--text2);">Interiors</span></td><td>Mexico</td><td>Tier 1</td><td>Jun 2, 2026</td><td><span class="badge badge-g">Responded</span></td><td><div class="risk-dots"><div class="dot g"></div><div class="dot g"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></td><td>92%</td></tr>
-            <tr data-status="pending"><td><strong>Tata Steel IN</strong><br><span style="font-size:11px; color:var(--text2);">Raw materials</span></td><td>India</td><td>Tier 2</td><td>May 10, 2026</td><td><span class="badge badge-a">Pending</span></td><td><div class="risk-dots"><div class="dot a"></div><div class="dot a"></div><div class="dot a"></div><div class="dot"></div><div class="dot"></div></div></td><td>72%</td></tr>
-            <tr data-status="pending"><td><strong>Minda Industries IN</strong><br><span style="font-size:11px; color:var(--text2);">Electrical</span></td><td>India</td><td>Tier 2</td><td>May 18, 2026</td><td><span class="badge badge-a">Pending</span></td><td><div class="risk-dots"><div class="dot a"></div><div class="dot a"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></td><td>65%</td></tr>
-            <tr data-status="escalated"><td><strong>Foshan Mfg CN</strong><br><span style="font-size:11px; color:var(--text2);">Castings</span></td><td>Asia Pacific</td><td>Tier 2</td><td>Apr 22, 2026</td><td><span class="badge badge-r">Escalated</span></td><td><div class="risk-dots"><div class="dot r"></div><div class="dot r"></div><div class="dot r"></div><div class="dot r"></div><div class="dot"></div></div></td><td>41%</td></tr>
-            <tr data-status="escalated"><td><strong>Zhejiang Parts CN</strong><br><span style="font-size:11px; color:var(--text2);">Stamping</span></td><td>Asia Pacific</td><td>Tier 2</td><td>Apr 15, 2026</td><td><span class="badge badge-r">Escalated</span></td><td><div class="risk-dots"><div class="dot r"></div><div class="dot r"></div><div class="dot r"></div><div class="dot r"></div><div class="dot r"></div></div></td><td>28%</td></tr>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table id="supplier-table">
+          <thead><tr><th>Supplier</th><th>Region</th><th>Tier</th><th>Commodity</th><th>Contact</th><th>Status</th><th>Days since contact</th><th>Actions</th></tr></thead>
+          <tbody id="supplier-tbody">
+            <tr><td colspan="8"><div class="empty-state" style="padding:2rem;"><i class="ti ti-building-factory"></i><p>No suppliers added yet. Add manually or import a CSV file.</p></div></td></tr>
           </tbody>
         </table>
       </div>
-      <div style="font-size:12px; color:var(--text2); margin-top:8px;">Showing 8 of 847 suppliers</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px;" id="supplier-count">0 suppliers</div>
     </div>
 
     <!-- INTELLIGENCE -->
     <div id="page-intelligence" class="page">
       <div class="page-header">
-        <div><div class="page-title">Intelligence</div><div class="page-sub">Supplier analytics, gaps, and leadership insights</div></div>
-      </div>
-      <div class="metrics">
-        <div class="metric"><div class="metric-label">Avg response time</div><div class="metric-value">4.2d</div><div class="metric-sub">Target: under 5d</div></div>
-        <div class="metric"><div class="metric-label">Data completeness</div><div class="metric-value g">91%</div><div class="metric-sub">+4% vs Q1</div></div>
-        <div class="metric"><div class="metric-label">Contact gaps</div><div class="metric-value a">23</div><div class="metric-sub">Causing bounces</div></div>
-        <div class="metric"><div class="metric-label">Campaigns closed</div><div class="metric-value">12</div><div class="metric-sub">This year</div></div>
+        <div><div class="page-title">Intelligence</div><div class="page-sub">Analytics and leadership-ready insights</div></div>
+        <button class="btn" onclick="exportReport()"><i class="ti ti-download"></i> Export report</button>
       </div>
       <div class="grid2">
         <div class="card">
-          <div class="card-title">Response by tier</div>
-          <div class="chart-wrap"><canvas id="tierChart" role="img" aria-label="Doughnut chart showing response rates by supplier tier. Tier 1: 91%, Tier 2: 68%, Tier 3: 54%.">Tier 1: 91%, Tier 2: 68%, Tier 3: 54%.</canvas></div>
+          <div class="card-title">Response rate by tier</div>
+          <div class="chart-wrap"><canvas id="tierChart" role="img" aria-label="Bar chart showing response rate by supplier tier.">Response by tier.</canvas></div>
         </div>
         <div class="card">
-          <div class="card-title">Campaign performance history</div>
-          <div class="chart-wrap"><canvas id="perfChart" role="img" aria-label="Bar chart showing response rates of last 5 campaigns ranging from 72% to 94%.">Last 5 campaigns: 72%, 78%, 85%, 88%, 94%.</canvas></div>
+          <div class="card-title">Supplier distribution by region</div>
+          <div class="chart-wrap"><canvas id="distChart" role="img" aria-label="Doughnut chart showing supplier distribution by region.">Supplier distribution.</canvas></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-title">Key gaps and recommended actions</div>
-        <div class="intel-row">
-          <span class="badge badge-r" style="flex-shrink:0;">High</span>
-          <div style="flex:1;"><div style="font-size:13px; font-weight:500;">8 suppliers with no response in 60+ days</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Asia Pacific and India primarily. Recommend direct phone escalation and category manager involvement.</div></div>
+        <div class="card-title">Gap analysis and recommended actions</div>
+        <div id="gap-analysis">
+          <div class="empty-state"><i class="ti ti-chart-bar"></i><p>Add suppliers and update their status to generate gap analysis and recommendations.</p></div>
         </div>
-        <div class="intel-row">
-          <span class="badge badge-a" style="flex-shrink:0;">Medium</span>
-          <div style="flex:1;"><div style="font-size:13px; font-weight:500;">23 suppliers with outdated contact records</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Outreach bouncing. Contact verification campaign scheduled Jun 15. Manual interim outreach needed for critical suppliers.</div></div>
-        </div>
-        <div class="intel-row">
-          <span class="badge badge-a" style="flex-shrink:0;">Medium</span>
-          <div style="flex:1;"><div style="font-size:13px; font-weight:500;">Asia Pacific response rate 71% vs 82% global average</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">Gap likely driven by time zone and language barriers. Recommend localized outreach templates and regional follow-up cadence.</div></div>
-        </div>
-        <div class="intel-row">
-          <span class="badge badge-b" style="flex-shrink:0;">Low</span>
-          <div style="flex:1;"><div style="font-size:13px; font-weight:500;">CO2 data missing for 3 Tier 2 suppliers</div><div style="font-size:12px; color:var(--text2); margin-top:2px;">CBAM compliance risk for EU-bound shipments. Template and guidance sent. Follow up due Jun 10.</div></div>
-        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Leadership summary</div>
+        <div id="leadership-summary" style="font-size:13px;color:var(--text2);padding:1rem 0;">Add supplier data to generate a leadership-ready summary.</div>
       </div>
     </div>
 
     <!-- ESCALATIONS -->
     <div id="page-escalations" class="page">
       <div class="page-header">
-        <div><div class="page-title">Escalations</div><div class="page-sub">8 suppliers requiring immediate action</div></div>
+        <div><div class="page-title">Escalations</div><div class="page-sub" id="esc-sub">Suppliers requiring immediate action</div></div>
       </div>
-      <div class="card" style="padding:0; overflow:hidden;">
-        <table>
-          <thead><tr><th>Supplier</th><th>Region</th><th>Last response</th><th>Days silent</th><th>Campaign</th><th>Priority</th></tr></thead>
-          <tbody>
-            <tr><td><strong>Foshan Mfg CN</strong></td><td>Asia Pacific</td><td>Apr 22, 2026</td><td>42 days</td><td>Q2 Compliance</td><td><span class="badge badge-r">Critical</span></td></tr>
-            <tr><td><strong>Zhejiang Parts CN</strong></td><td>Asia Pacific</td><td>Apr 15, 2026</td><td>49 days</td><td>Q2 Compliance</td><td><span class="badge badge-r">Critical</span></td></tr>
-            <tr><td><strong>PT Bali Components ID</strong></td><td>Asia Pacific</td><td>Apr 30, 2026</td><td>34 days</td><td>Risk Assessment</td><td><span class="badge badge-r">High</span></td></tr>
-            <tr><td><strong>Ranjangaon Steel IN</strong></td><td>India</td><td>May 2, 2026</td><td>32 days</td><td>Q2 Compliance</td><td><span class="badge badge-r">High</span></td></tr>
-            <tr><td><strong>Visteon PL</strong></td><td>Europe</td><td>May 12, 2026</td><td>22 days</td><td>Q2 Compliance</td><td><span class="badge badge-a">Medium</span></td></tr>
-            <tr><td><strong>Kautex MX</strong></td><td>Mexico</td><td>May 15, 2026</td><td>19 days</td><td>Contact Verify</td><td><span class="badge badge-a">Medium</span></td></tr>
-            <tr><td><strong>Sejong KR</strong></td><td>Asia Pacific</td><td>May 18, 2026</td><td>16 days</td><td>Q2 Compliance</td><td><span class="badge badge-a">Medium</span></td></tr>
-            <tr><td><strong>Hota Industrial TW</strong></td><td>Asia Pacific</td><td>May 20, 2026</td><td>14 days</td><td>Risk Assessment</td><td><span class="badge badge-a">Medium</span></td></tr>
-          </tbody>
-        </table>
+      <div id="escalations-list">
+        <div class="empty-state"><i class="ti ti-alert-triangle"></i><p>No escalations. Suppliers marked as Escalated will appear here.</p></div>
       </div>
     </div>
 
-    <!-- CONTACTS -->
-    <div id="page-contacts" class="page">
+    <!-- IMPORT -->
+    <div id="page-import" class="page">
       <div class="page-header">
-        <div><div class="page-title">Contact data</div><div class="page-sub">Supplier contact accuracy — 87% verified, 23 gaps</div></div>
-        <button class="btn primary"><i class="ti ti-upload"></i> Import contacts</button>
+        <div><div class="page-title">Import data</div><div class="page-sub">Upload a CSV file to bulk import suppliers</div></div>
       </div>
-      <div class="metrics">
-        <div class="metric"><div class="metric-label">Total contacts</div><div class="metric-value">2,341</div></div>
-        <div class="metric"><div class="metric-label">Verified</div><div class="metric-value g">2,036</div></div>
-        <div class="metric"><div class="metric-label">Unverified</div><div class="metric-value a">282</div></div>
-        <div class="metric"><div class="metric-label">Missing</div><div class="metric-value r">23</div></div>
+      <div class="help-banner"><i class="ti ti-info-circle"></i><div><strong>CSV format required:</strong> Name, Region, Tier, Commodity, Contact Name, Contact Email, Status, Days Since Contact<br>Status values: Responded / Pending / Escalated &nbsp;|&nbsp; Tier values: Tier 1 / Tier 2 / Tier 3</div></div>
+      <div class="card">
+        <div class="card-title">Upload supplier CSV</div>
+        <div class="upload-zone" onclick="document.getElementById('csv-input').click()">
+          <i class="ti ti-upload"></i>
+          <div style="font-size:13px;font-weight:500;">Click to upload CSV file</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">or drag and drop</div>
+        </div>
+        <input type="file" id="csv-input" accept=".csv" style="display:none;" onchange="importCSV(this)">
+        <div id="import-result" style="margin-top:1rem;"></div>
       </div>
       <div class="card">
-        <div class="card-title">Contact completeness by region</div>
-        <div class="chart-wrap"><canvas id="contactChart" role="img" aria-label="Horizontal bar chart showing contact data completeness by region. North America 96%, Europe 92%, Mexico 91%, India 83%, Asia Pacific 78%.">Contact completeness: N. America 96%, Europe 92%, Mexico 91%, India 83%, Asia Pacific 78%.</canvas></div>
+        <div class="card-title">Download sample CSV</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">Download a sample CSV to see the required format, fill it in with your suppliers, then upload it above.</p>
+        <button class="btn" onclick="downloadSample()"><i class="ti ti-download"></i> Download sample CSV</button>
+      </div>
+    </div>
+
+    <!-- GUIDE -->
+    <div id="page-guide" class="page">
+      <div class="page-header">
+        <div><div class="page-title">How to use this platform</div><div class="page-sub">A guide for new users</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">What problem does this solve?</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">
+          Global supply chains involve hundreds of suppliers across dozens of countries. Managing communication with all of them — collecting compliance data, running risk assessments, tracking who responded and who didn't — is typically done through scattered emails and spreadsheets with no visibility.<br><br>
+          This platform centralizes supplier communication management: you can track which suppliers responded to which campaigns, identify who is non-responsive, escalate gaps, and generate leadership-ready insights — all in one place.
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 1 — Add your suppliers</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">Go to <strong>Suppliers</strong> and click <strong>Add supplier</strong> to manually add one at a time. Or go to <strong>Import data</strong> to bulk upload a CSV file with all your suppliers at once. Each supplier needs: name, region, tier, commodity, contact name, contact email, and current status (Responded / Pending / Escalated).</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 2 — Create a campaign</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">Go to <strong>Campaigns</strong> and click <strong>New campaign</strong>. Name your campaign, set the type (compliance data, risk assessment, corrective action, etc.), set a due date, and choose which suppliers to target. The campaign will track how many suppliers responded vs. are still pending.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 3 — Update supplier status</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">As suppliers respond to your outreach, go to <strong>Suppliers</strong> and update their status. Use <strong>Responded</strong> when they've submitted the required data, <strong>Pending</strong> for those still waiting, and <strong>Escalated</strong> for suppliers who have been silent too long and need direct intervention.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Step 4 — Monitor and act</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">The <strong>Overview</strong> dashboard shows your response rate, active campaigns, and escalations in real time. The <strong>Intelligence</strong> tab generates gap analysis and a leadership-ready summary from your data. The <strong>Escalations</strong> tab shows all suppliers flagged for immediate action.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">What this demonstrates</div>
+        <p style="font-size:13px;line-height:1.7;color:var(--text2);">
+          This tool was built to demonstrate the ability to design and manage scalable supplier communication programs — owning outreach strategy, driving supplier accountability, ensuring data integrity, and generating leadership-ready insights across a global supply base. These are the core capabilities required for supplier communications and intelligence program management roles in complex manufacturing environments.
+        </p>
       </div>
     </div>
 
   </main>
 </div>
 
-<!-- NEW CAMPAIGN MODAL -->
-<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+<!-- CAMPAIGN MODAL -->
+<div class="modal-backdrop" id="modal-campaign" onclick="if(event.target===this)closeModal('campaign')">
   <div class="modal">
     <div class="modal-title">Create outreach campaign</div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">Campaign name</label><input type="text" placeholder="e.g. Q3 Compliance Collection" /></div>
-      <div class="form-group"><label class="form-label">Campaign type</label><select><option>Compliance data</option><option>Risk assessment</option><option>Corrective action</option><option>Contact verification</option><option>CO2 emissions data</option></select></div>
+      <div class="form-group"><label class="form-label">Campaign name *</label><input type="text" id="c-name" placeholder="e.g. Q2 Compliance Collection"></div>
+      <div class="form-group"><label class="form-label">Campaign type *</label><select id="c-type"><option>Compliance data</option><option>Risk assessment</option><option>Corrective action</option><option>Contact verification</option><option>CO2 emissions data</option><option>Other</option></select></div>
     </div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">Target suppliers</label><select><option>All active (847)</option><option>Tier 1 only (203)</option><option>Tier 2 only (512)</option><option>High risk only (47)</option><option>Non-responsive (31)</option><option>Asia Pacific (186)</option></select></div>
-      <div class="form-group"><label class="form-label">Due date</label><input type="date" /></div>
+      <div class="form-group"><label class="form-label">Target suppliers</label><select id="c-target"><option value="all">All suppliers</option><option value="Pending">Pending only</option><option value="Escalated">Escalated only</option><option value="Tier 1">Tier 1 only</option><option value="Tier 2">Tier 2 only</option></select></div>
+      <div class="form-group"><label class="form-label">Due date *</label><input type="date" id="c-due"></div>
     </div>
-    <div class="form-group" style="margin-bottom:12px;"><label class="form-label">Message / instructions to suppliers</label><textarea rows="3" placeholder="Describe what suppliers need to submit and why..."></textarea></div>
+    <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Description / instructions to suppliers</label><textarea id="c-desc" rows="3" placeholder="What are you asking suppliers to submit and why?"></textarea></div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">Reminder cadence</label><select><option>Weekly reminders</option><option>Every 3 days</option><option>Manual only</option><option>Daily (last week)</option></select></div>
-      <div class="form-group"><label class="form-label">Escalation trigger</label><select><option>After 30 days no response</option><option>After 14 days no response</option><option>After 7 days no response</option><option>Manual escalation only</option></select></div>
+      <div class="form-group"><label class="form-label">Escalation trigger</label><select id="c-esc"><option value="30">After 30 days no response</option><option value="14">After 14 days no response</option><option value="7">After 7 days no response</option><option value="0">Manual only</option></select></div>
+      <div class="form-group"><label class="form-label">Priority</label><select id="c-pri"><option>High</option><option>Medium</option><option>Low</option></select></div>
     </div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn primary" onclick="closeModal()"><i class="ti ti-speakerphone"></i> Launch campaign</button>
+      <button class="btn" onclick="closeModal('campaign')">Cancel</button>
+      <button class="btn primary" onclick="saveCampaign()"><i class="ti ti-speakerphone"></i> Launch campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div class="modal-backdrop" id="modal-supplier" onclick="if(event.target===this)closeModal('supplier')">
+  <div class="modal">
+    <div class="modal-title" id="supplier-modal-title">Add supplier</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Supplier name *</label><input type="text" id="s-name" placeholder="e.g. Magna International"></div>
+      <div class="form-group"><label class="form-label">Region *</label><select id="s-region"><option>N. America</option><option>Europe</option><option>Asia Pacific</option><option>India</option><option>Mexico</option><option>Middle East</option><option>South America</option><option>Other</option></select></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Tier *</label><select id="s-tier"><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option></select></div>
+      <div class="form-group"><label class="form-label">Commodity</label><input type="text" id="s-commodity" placeholder="e.g. Plastics, Electronics"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Contact name</label><input type="text" id="s-contact" placeholder="Primary contact name"></div>
+      <div class="form-group"><label class="form-label">Contact email</label><input type="email" id="s-email" placeholder="contact@supplier.com"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Status *</label><select id="s-status"><option>Pending</option><option>Responded</option><option>Escalated</option></select></div>
+      <div class="form-group"><label class="form-label">Days since last contact</label><input type="number" id="s-days" placeholder="0" min="0"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px;"><label class="form-label">Notes</label><textarea id="s-notes" rows="2" placeholder="Any additional notes about this supplier..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('supplier')">Cancel</button>
+      <button class="btn primary" onclick="saveSupplier()"><i class="ti ti-check"></i> Save supplier</button>
     </div>
   </div>
 </div>
 
 <script>
+// State
+let suppliers = JSON.parse(localStorage.getItem('scip_suppliers') || '[]');
+let campaigns = JSON.parse(localStorage.getItem('scip_campaigns') || '[]');
+let activity = JSON.parse(localStorage.getItem('scip_activity') || '[]');
+let editingSupplierIdx = null;
+let regionChart, statusChart, tierChart, distChart;
+
+function save() {
+  localStorage.setItem('scip_suppliers', JSON.stringify(suppliers));
+  localStorage.setItem('scip_campaigns', JSON.stringify(campaigns));
+  localStorage.setItem('scip_activity', JSON.stringify(activity));
+}
+
+function addActivity(msg, color) {
+  activity.unshift({ msg, color, time: new Date().toLocaleString() });
+  if (activity.length > 20) activity.pop();
+  save();
+  renderActivity();
+}
+
+function renderActivity() {
+  const el = document.getElementById('activity-log');
+  if (!activity.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-clock"></i><p>Activity will appear here as you add suppliers and run campaigns</p></div>';
+    return;
+  }
+  el.innerHTML = activity.slice(0, 8).map(a =>
+    `<div class="intel-row"><div class="activity-dot" style="background:${a.color};margin-top:5px;"></div><div><div style="font-size:13px;">${a.msg}</div><div style="font-size:11px;color:var(--text3);margin-top:1px;">${a.time}</div></div></div>`
+  ).join('');
+}
+
+function updateMetrics() {
+  const total = suppliers.length;
+  const responded = suppliers.filter(s => s.status === 'Responded').length;
+  const pending = suppliers.filter(s => s.status === 'Pending').length;
+  const escalated = suppliers.filter(s => s.status === 'Escalated').length;
+  const rate = total ? Math.round(responded / total * 100) : 0;
+  const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
+  const withEmail = suppliers.filter(s => s.email).length;
+  const complete = total ? Math.round(withEmail / total * 100) : 0;
+
+  document.getElementById('m-total').textContent = total;
+  document.getElementById('m-rate').textContent = rate + '%';
+  document.getElementById('m-rate-sub').textContent = responded + ' of ' + total + ' responded';
+  document.getElementById('m-pending').textContent = pending;
+  document.getElementById('m-esc').textContent = escalated;
+  document.getElementById('m-campaigns').textContent = activeCampaigns;
+  document.getElementById('m-complete').textContent = complete + '%';
+  document.getElementById('nav-campaigns-badge').textContent = campaigns.length;
+  document.getElementById('nav-suppliers-badge').textContent = total;
+  document.getElementById('nav-esc-badge').textContent = escalated;
+  document.getElementById('topbar-sub').textContent = total + ' suppliers · ' + campaigns.length + ' campaigns';
+  document.getElementById('suppliers-sub').textContent = total + ' suppliers · ' + responded + ' responded · ' + pending + ' pending · ' + escalated + ' escalated';
+  document.getElementById('overview-sub').textContent = total > 0 ? 'Last updated: ' + new Date().toLocaleDateString() : 'Add suppliers and create campaigns to get started';
+  document.getElementById('esc-sub').textContent = escalated + ' suppliers requiring immediate action';
+  document.getElementById('supplier-count').textContent = total + ' suppliers';
+
+  updateCharts();
+  updateGapAnalysis();
+  updateLeadershipSummary();
+}
+
+function getRegionRates() {
+  const regions = {};
+  suppliers.forEach(s => {
+    if (!regions[s.region]) regions[s.region] = { total: 0, responded: 0 };
+    regions[s.region].total++;
+    if (s.status === 'Responded') regions[s.region].responded++;
+  });
+  return regions;
+}
+
+function updateCharts() {
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
+  const textColor = isDark ? '#888' : '#999';
+
+  // Region chart
+  const regions = getRegionRates();
+  const rLabels = Object.keys(regions);
+  const rData = rLabels.map(r => regions[r].total ? Math.round(regions[r].responded / regions[r].total * 100) : 0);
+
+  if (regionChart) regionChart.destroy();
+  regionChart = new Chart(document.getElementById('regionChart'), {
+    type: 'bar',
+    data: { labels: rLabels.length ? rLabels : ['No data'], datasets: [{ data: rLabels.length ? rData : [0], backgroundColor: isDark ? '#185FA5' : '#378ADD', borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } }, y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%' } } } }
+  });
+
+  // Status chart
+  const responded = suppliers.filter(s => s.status === 'Responded').length;
+  const pending = suppliers.filter(s => s.status === 'Pending').length;
+  const escalated = suppliers.filter(s => s.status === 'Escalated').length;
+
+  if (statusChart) statusChart.destroy();
+  statusChart = new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: { labels: ['Responded', 'Pending', 'Escalated'], datasets: [{ data: [responded || 0, pending || 0, escalated || 0], backgroundColor: ['#639922', '#BA7517', '#E24B4A'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, color: textColor, boxWidth: 10, padding: 10 } } } }
+  });
+
+  // Tier chart
+  const tiers = {};
+  suppliers.forEach(s => {
+    if (!tiers[s.tier]) tiers[s.tier] = { total: 0, responded: 0 };
+    tiers[s.tier].total++;
+    if (s.status === 'Responded') tiers[s.tier].responded++;
+  });
+  const tLabels = Object.keys(tiers).sort();
+  const tData = tLabels.map(t => tiers[t].total ? Math.round(tiers[t].responded / tiers[t].total * 100) : 0);
+
+  if (tierChart) tierChart.destroy();
+  tierChart = new Chart(document.getElementById('tierChart'), {
+    type: 'bar',
+    data: { labels: tLabels.length ? tLabels : ['No data'], datasets: [{ data: tLabels.length ? tData : [0], backgroundColor: ['#639922', '#BA7517', '#E24B4A'], borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } }, y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 }, callback: v => v + '%' } } } }
+  });
+
+  // Distribution chart
+  const distLabels = Object.keys(regions);
+  const distData = distLabels.map(r => regions[r].total);
+  const colors = ['#378ADD', '#639922', '#BA7517', '#E24B4A', '#9F77DD', '#1D9E75', '#D85A30'];
+
+  if (distChart) distChart.destroy();
+  distChart = new Chart(document.getElementById('distChart'), {
+    type: 'doughnut',
+    data: { labels: distLabels.length ? distLabels : ['No data'], datasets: [{ data: distLabels.length ? distData : [1], backgroundColor: distLabels.length ? colors.slice(0, distLabels.length) : ['#ccc'], borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, color: textColor, boxWidth: 10, padding: 10 } } } }
+  });
+}
+
+function updateGapAnalysis() {
+  const el = document.getElementById('gap-analysis');
+  if (!suppliers.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-chart-bar"></i><p>Add suppliers and update their status to generate gap analysis.</p></div>';
+    return;
+  }
+  const escalated = suppliers.filter(s => s.status === 'Escalated');
+  const pending = suppliers.filter(s => s.status === 'Pending');
+  const noEmail = suppliers.filter(s => !s.email);
+  const regions = getRegionRates();
+  const lowRegions = Object.entries(regions).filter(([r, d]) => d.total > 1 && d.responded / d.total < 0.7).map(([r]) => r);
+
+  let html = '';
+  if (escalated.length) html += `<div class="intel-row"><span class="badge br" style="flex-shrink:0;margin-top:2px;">High</span><div style="flex:1;margin-left:10px;"><div style="font-size:13px;font-weight:500;">${escalated.length} supplier${escalated.length > 1 ? 's' : ''} escalated — immediate action required</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">${escalated.map(s => s.name).join(', ')} — direct outreach recommended via phone or category manager escalation.</div></div></div>`;
+  if (pending.filter(s => (parseInt(s.days) || 0) > 20).length) {
+    const longPending = pending.filter(s => (parseInt(s.days) || 0) > 20);
+    html += `<div class="intel-row"><span class="badge ba" style="flex-shrink:0;margin-top:2px;">Medium</span><div style="flex:1;margin-left:10px;"><div style="font-size:13px;font-weight:500;">${longPending.length} supplier${longPending.length > 1 ? 's' : ''} pending for 20+ days</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">Consider escalating: ${longPending.map(s => s.name).join(', ')}</div></div></div>`;
+  }
+  if (noEmail.length) html += `<div class="intel-row"><span class="badge ba" style="flex-shrink:0;margin-top:2px;">Medium</span><div style="flex:1;margin-left:10px;"><div style="font-size:13px;font-weight:500;">${noEmail.length} supplier${noEmail.length > 1 ? 's' : ''} missing contact email</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">Outreach will bounce without verified contact data. Update contact records: ${noEmail.map(s => s.name).join(', ')}</div></div></div>`;
+  if (lowRegions.length) html += `<div class="intel-row"><span class="badge bb" style="flex-shrink:0;margin-top:2px;">Low</span><div style="flex:1;margin-left:10px;"><div style="font-size:13px;font-weight:500;">Low response rate in: ${lowRegions.join(', ')}</div><div style="font-size:12px;color:var(--text2);margin-top:2px;">Response rate below 70%. Consider localized outreach templates or regional follow-up cadence.</div></div></div>`;
+  if (!html) html = '<div style="padding:1rem 0;font-size:13px;color:var(--text2);">No critical gaps identified. Response rates and data completeness look good.</div>';
+  el.innerHTML = html;
+}
+
+function updateLeadershipSummary() {
+  const el = document.getElementById('leadership-summary');
+  if (!suppliers.length) { el.textContent = 'Add supplier data to generate a leadership-ready summary.'; return; }
+  const total = suppliers.length;
+  const responded = suppliers.filter(s => s.status === 'Responded').length;
+  const pending = suppliers.filter(s => s.status === 'Pending').length;
+  const escalated = suppliers.filter(s => s.status === 'Escalated').length;
+  const rate = Math.round(responded / total * 100);
+  const regions = getRegionRates();
+  const bestRegion = Object.entries(regions).sort((a, b) => (b[1].responded / b[1].total) - (a[1].responded / a[1].total))[0];
+  const worstRegion = Object.entries(regions).filter(([r, d]) => d.total > 0).sort((a, b) => (a[1].responded / a[1].total) - (b[1].responded / b[1].total))[0];
+
+  el.innerHTML = `<p style="line-height:1.8;">As of ${new Date().toLocaleDateString()}, the global supplier communication program covers <strong>${total} suppliers</strong> across ${Object.keys(regions).length} regions. Overall response rate stands at <strong style="color:${rate >= 80 ? 'var(--green)' : rate >= 60 ? 'var(--amber)' : 'var(--red)'};">${rate}%</strong> (${responded} responded, ${pending} pending, ${escalated} escalated).</p>
+  ${bestRegion ? `<p style="line-height:1.8;margin-top:8px;">Strongest performance in <strong>${bestRegion[0]}</strong> (${Math.round(bestRegion[1].responded / bestRegion[1].total * 100)}% response rate). ${worstRegion && worstRegion[0] !== bestRegion[0] ? `Lowest response rate in <strong>${worstRegion[0]}</strong> (${Math.round(worstRegion[1].responded / worstRegion[1].total * 100)}%) — targeted follow-up recommended.` : ''}</p>` : ''}
+  ${escalated > 0 ? `<p style="line-height:1.8;margin-top:8px;color:var(--red);"><strong>${escalated} supplier${escalated > 1 ? 's' : ''} escalated</strong> — direct intervention required to maintain data integrity and compliance timelines.</p>` : ''}`;
+}
+
+// Suppliers
+function renderSuppliers(list) {
+  const tbody = document.getElementById('supplier-tbody');
+  if (!list || !list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state" style="padding:2rem;"><i class="ti ti-building-factory"></i><p>No suppliers match the current filter.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map((s, i) => {
+    const idx = suppliers.indexOf(s);
+    const days = parseInt(s.days) || 0;
+    const dayColor = days > 30 ? 'var(--red)' : days > 14 ? 'var(--amber)' : 'var(--text2)';
+    const badgeClass = s.status === 'Responded' ? 'bg' : s.status === 'Escalated' ? 'br' : 'ba';
+    return `<tr>
+      <td><strong style="font-size:12px;">${s.name}</strong>${s.notes ? `<br><span style="font-size:10px;color:var(--text3);">${s.notes.slice(0,40)}</span>` : ''}</td>
+      <td>${s.region}</td>
+      <td><span class="tag">${s.tier}</span></td>
+      <td style="color:var(--text2);">${s.commodity || '—'}</td>
+      <td style="font-size:11px;">${s.contact || '—'}<br><span style="color:var(--text3);">${s.email || '<span style="color:var(--amber);">No email</span>'}</span></td>
+      <td><select onchange="updateStatus(${idx}, this.value)" style="width:auto;font-size:11px;padding:3px 6px;">
+        <option ${s.status==='Pending'?'selected':''}>Pending</option>
+        <option ${s.status==='Responded'?'selected':''}>Responded</option>
+        <option ${s.status==='Escalated'?'selected':''}>Escalated</option>
+      </select></td>
+      <td style="color:${dayColor};font-weight:${days>14?'500':'400'};">${days > 0 ? days + 'd' : '—'}</td>
+      <td><button class="btn" style="padding:3px 8px;font-size:11px;" onclick="editSupplier(${idx})"><i class="ti ti-edit"></i></button> <button class="btn danger" style="padding:3px 8px;font-size:11px;" onclick="deleteSupplier(${idx})"><i class="ti ti-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStatus(idx, val) {
+  const old = suppliers[idx].status;
+  suppliers[idx].status = val;
+  save();
+  addActivity(`${suppliers[idx].name} status changed from ${old} to ${val}`, val === 'Responded' ? 'var(--green)' : val === 'Escalated' ? 'var(--red)' : 'var(--amber)');
+  updateMetrics();
+  renderEscalations();
+  filterSuppliers(document.getElementById('status-filter').value);
+}
+
+function deleteSupplier(idx) {
+  const name = suppliers[idx].name;
+  suppliers.splice(idx, 1);
+  save();
+  addActivity(`Supplier removed: ${name}`, 'var(--text3)');
+  updateMetrics();
+  populateRegionFilter();
+  filterSuppliers('all');
+  renderEscalations();
+}
+
+function editSupplier(idx) {
+  editingSupplierIdx = idx;
+  const s = suppliers[idx];
+  document.getElementById('supplier-modal-title').textContent = 'Edit supplier';
+  document.getElementById('s-name').value = s.name;
+  document.getElementById('s-region').value = s.region;
+  document.getElementById('s-tier').value = s.tier;
+  document.getElementById('s-commodity').value = s.commodity || '';
+  document.getElementById('s-contact').value = s.contact || '';
+  document.getElementById('s-email').value = s.email || '';
+  document.getElementById('s-status').value = s.status;
+  document.getElementById('s-days').value = s.days || '';
+  document.getElementById('s-notes').value = s.notes || '';
+  openModal('supplier');
+}
+
+function saveSupplier() {
+  const name = document.getElementById('s-name').value.trim();
+  if (!name) { alert('Supplier name is required.'); return; }
+  const s = {
+    name, region: document.getElementById('s-region').value,
+    tier: document.getElementById('s-tier').value,
+    commodity: document.getElementById('s-commodity').value.trim(),
+    contact: document.getElementById('s-contact').value.trim(),
+    email: document.getElementById('s-email').value.trim(),
+    status: document.getElementById('s-status').value,
+    days: document.getElementById('s-days').value,
+    notes: document.getElementById('s-notes').value.trim()
+  };
+  if (editingSupplierIdx !== null) {
+    suppliers[editingSupplierIdx] = s;
+    addActivity(`Supplier updated: ${name}`, 'var(--blue)');
+  } else {
+    suppliers.push(s);
+    addActivity(`New supplier added: ${name} (${s.region} · ${s.tier})`, 'var(--green)');
+  }
+  save();
+  closeModal('supplier');
+  updateMetrics();
+  populateRegionFilter();
+  filterSuppliers('all');
+  renderEscalations();
+  editingSupplierIdx = null;
+}
+
+function filterSuppliers(val) {
+  const region = document.getElementById('region-filter').value;
+  let list = suppliers;
+  if (val !== 'all') list = list.filter(s => s.status === val);
+  if (region !== 'all') list = list.filter(s => s.region === region);
+  renderSuppliers(list);
+  document.getElementById('supplier-count').textContent = list.length + ' of ' + suppliers.length + ' suppliers';
+}
+
+function filterByRegion(val) {
+  filterSuppliers(document.getElementById('status-filter').value);
+}
+
+function populateRegionFilter() {
+  const sel = document.getElementById('region-filter');
+  const current = sel.value;
+  const regions = [...new Set(suppliers.map(s => s.region))].sort();
+  sel.innerHTML = '<option value="all">All regions</option>' + regions.map(r => `<option value="${r}">${r}</option>`).join('');
+  if (regions.includes(current)) sel.value = current;
+}
+
+// Campaigns
+function saveCampaign() {
+  const name = document.getElementById('c-name').value.trim();
+  const due = document.getElementById('c-due').value;
+  if (!name || !due) { alert('Campaign name and due date are required.'); return; }
+  const target = document.getElementById('c-target').value;
+  const targeted = target === 'all' ? suppliers : suppliers.filter(s => s.status === target || s.tier === target);
+  const campaign = {
+    id: Date.now(), name,
+    type: document.getElementById('c-type').value,
+    target, due,
+    description: document.getElementById('c-desc').value.trim(),
+    escalationDays: document.getElementById('c-esc').value,
+    priority: document.getElementById('c-pri').value,
+    status: 'active',
+    totalTargeted: targeted.length,
+    created: new Date().toLocaleDateString()
+  };
+  campaigns.push(campaign);
+  save();
+  closeModal('campaign');
+  addActivity(`Campaign launched: "${name}" targeting ${targeted.length} suppliers`, 'var(--blue)');
+  updateMetrics();
+  renderCampaigns();
+}
+
+function renderCampaigns() {
+  const el = document.getElementById('campaigns-list');
+  if (!campaigns.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-speakerphone"></i><p>No campaigns yet. Create your first campaign to start tracking supplier outreach.</p></div>';
+    return;
+  }
+  el.innerHTML = campaigns.map((c, i) => {
+    const responded = c.target === 'all' ? suppliers.filter(s => s.status === 'Responded').length :
+      suppliers.filter(s => (s.status === c.target || s.tier === c.target) && s.status === 'Responded').length;
+    const total = c.totalTargeted || 1;
+    const rate = Math.round(responded / total * 100);
+    const pending = total - responded;
+    const dueDate = new Date(c.due);
+    const today = new Date();
+    const daysLeft = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+    const statusBadge = c.status === 'active' ? `<span class="badge ba">In progress</span>` : `<span class="badge bg">Completed</span>`;
+    const priColor = c.priority === 'High' ? 'var(--red)' : c.priority === 'Medium' ? 'var(--amber)' : 'var(--green)';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+        <div>
+          <div style="font-size:14px;font-weight:500;">${c.name}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px;">${c.type} · ${c.target === 'all' ? 'All suppliers' : c.target} · Due ${c.due} · <span style="color:${priColor};">${c.priority} priority</span></div>
+          ${c.description ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${c.description}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;">${statusBadge}
+          <button class="btn" style="padding:3px 8px;font-size:11px;" onclick="toggleCampaignStatus(${i})">${c.status === 'active' ? 'Close' : 'Reopen'}</button>
+          <button class="btn danger" style="padding:3px 8px;font-size:11px;" onclick="deleteCampaign(${i})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${rate}%;background:${rate>=80?'var(--green)':rate>=50?'var(--amber)':'var(--red)'};"></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px;">${rate}% responded · ${pending} pending · ${daysLeft > 0 ? daysLeft + ' days remaining' : 'Overdue'}</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px;">
+        <div><div style="font-size:16px;font-weight:500;">${total}</div><div style="font-size:10px;color:var(--text2);">Targeted</div></div>
+        <div><div style="font-size:16px;font-weight:500;color:var(--green);">${responded}</div><div style="font-size:10px;color:var(--text2);">Responded</div></div>
+        <div><div style="font-size:16px;font-weight:500;color:var(--amber);">${pending}</div><div style="font-size:10px;color:var(--text2);">Pending</div></div>
+        <div><div style="font-size:16px;font-weight:500;">${rate}%</div><div style="font-size:10px;color:var(--text2);">Rate</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCampaignStatus(i) {
+  campaigns[i].status = campaigns[i].status === 'active' ? 'closed' : 'active';
+  save();
+  addActivity(`Campaign "${campaigns[i].name}" ${campaigns[i].status === 'active' ? 'reopened' : 'closed'}`, 'var(--text2)');
+  updateMetrics();
+  renderCampaigns();
+}
+
+function deleteCampaign(i) {
+  const name = campaigns[i].name;
+  campaigns.splice(i, 1);
+  save();
+  addActivity(`Campaign deleted: "${name}"`, 'var(--text3)');
+  updateMetrics();
+  renderCampaigns();
+}
+
+// Escalations
+function renderEscalations() {
+  const el = document.getElementById('escalations-list');
+  const esc = suppliers.filter(s => s.status === 'Escalated');
+  if (!esc.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-alert-triangle"></i><p>No escalations. Suppliers marked as Escalated will appear here.</p></div>';
+    return;
+  }
+  el.innerHTML = `<div class="card" style="padding:0;overflow:hidden;"><table>
+    <thead><tr><th>Supplier</th><th>Region</th><th>Tier</th><th>Contact</th><th>Days silent</th><th>Notes</th><th>Action</th></tr></thead>
+    <tbody>${esc.map((s, i) => {
+      const idx = suppliers.indexOf(s);
+      return `<tr>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.region}</td>
+        <td><span class="tag">${s.tier}</span></td>
+        <td style="font-size:11px;">${s.contact || '—'}<br><span style="color:var(--text3);">${s.email || 'No email'}</span></td>
+        <td style="color:var(--red);font-weight:500;">${s.days || '?'}d</td>
+        <td style="font-size:11px;color:var(--text2);">${s.notes || '—'}</td>
+        <td><button class="btn" style="font-size:11px;padding:3px 8px;" onclick="updateStatus(${idx},'Responded')">Mark responded</button></td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table></div>`;
+}
+
+// CSV Import
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true,
+    complete: function(results) {
+      const result = document.getElementById('import-result');
+      if (!results.data.length) { result.innerHTML = '<p style="color:var(--red);font-size:13px;">No data found in CSV.</p>'; return; }
+      let added = 0, errors = 0;
+      results.data.forEach(row => {
+        const name = (row['Name'] || row['name'] || '').trim();
+        if (!name) { errors++; return; }
+        suppliers.push({
+          name,
+          region: row['Region'] || row['region'] || 'Other',
+          tier: row['Tier'] || row['tier'] || 'Tier 2',
+          commodity: row['Commodity'] || row['commodity'] || '',
+          contact: row['Contact Name'] || row['contact_name'] || '',
+          email: row['Contact Email'] || row['contact_email'] || '',
+          status: row['Status'] || row['status'] || 'Pending',
+          days: row['Days Since Contact'] || row['days'] || '0',
+          notes: row['Notes'] || row['notes'] || ''
+        });
+        added++;
+      });
+      save();
+      addActivity(`CSV import: ${added} suppliers imported`, 'var(--green)');
+      updateMetrics();
+      populateRegionFilter();
+      filterSuppliers('all');
+      renderEscalations();
+      result.innerHTML = `<div style="background:var(--green-bg);color:var(--green-text);padding:10px 14px;border-radius:var(--radius);font-size:13px;"><i class="ti ti-check"></i> Successfully imported ${added} suppliers${errors > 0 ? ` (${errors} rows skipped due to missing name)` : ''}.</div>`;
+      input.value = '';
+    },
+    error: () => { document.getElementById('import-result').innerHTML = '<p style="color:var(--red);font-size:13px;">Error reading CSV file. Please check the format.</p>'; }
+  });
+}
+
+function downloadSample() {
+  const csv = `Name,Region,Tier,Commodity,Contact Name,Contact Email,Status,Days Since Contact,Notes
+Magna International,N. America,Tier 1,Plastics,John Smith,jsmith@magna.com,Responded,2,Key Tier 1 supplier
+Bosch GmbH,Europe,Tier 1,Electronics,Anna Muller,a.muller@bosch.com,Responded,5,
+Tata Steel IN,India,Tier 2,Raw Materials,Raj Patel,raj.patel@tata.com,Pending,18,Reminder sent May 20
+Foshan Mfg,Asia Pacific,Tier 2,Castings,Wei Zhang,,Escalated,42,No response to 3 outreach attempts
+Grupo Antolin,Mexico,Tier 1,Interiors,Carlos Diaz,c.diaz@antolin.com,Responded,1,`;
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'supplier-template.csv';
+  a.click();
+}
+
+function exportReport() {
+  const total = suppliers.length;
+  const responded = suppliers.filter(s => s.status === 'Responded').length;
+  const pending = suppliers.filter(s => s.status === 'Pending').length;
+  const escalated = suppliers.filter(s => s.status === 'Escalated').length;
+  const rate = total ? Math.round(responded / total * 100) : 0;
+  let csv = `Supplier Communications & Intelligence Report\nGenerated: ${new Date().toLocaleString()}\n\n`;
+  csv += `SUMMARY\nTotal Suppliers,${total}\nResponse Rate,${rate}%\nResponded,${responded}\nPending,${pending}\nEscalated,${escalated}\nActive Campaigns,${campaigns.filter(c => c.status === 'active').length}\n\n`;
+  csv += `SUPPLIER DETAILS\nName,Region,Tier,Commodity,Contact,Email,Status,Days Since Contact\n`;
+  csv += suppliers.map(s => `${s.name},${s.region},${s.tier},${s.commodity || ''},${s.contact || ''},${s.email || ''},${s.status},${s.days || 0}`).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `supplier-report-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// Modal
+function openModal(type) {
+  if (type === 'supplier') {
+    editingSupplierIdx = null;
+    document.getElementById('supplier-modal-title').textContent = 'Add supplier';
+    ['s-name','s-commodity','s-contact','s-email','s-notes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('s-region').value = 'N. America';
+    document.getElementById('s-tier').value = 'Tier 1';
+    document.getElementById('s-status').value = 'Pending';
+    document.getElementById('s-days').value = '';
+  }
+  if (type === 'campaign') {
+    ['c-name','c-desc','c-due'].forEach(id => document.getElementById(id).value = '');
+  }
+  document.getElementById('modal-' + type).classList.add('open');
+}
+
+function closeModal(type) {
+  document.getElementById('modal-' + type).classList.remove('open');
+}
+
 function showPage(name, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   el.classList.add('active');
-}
-function openModal() { document.getElementById('modalBackdrop').classList.add('open'); }
-function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); }
-function filterTable(val) {
-  document.querySelectorAll('#supplierTable tbody tr').forEach(tr => {
-    tr.style.display = (val === 'all' || tr.dataset.status === val) ? '' : 'none';
-  });
+  if (name === 'suppliers') filterSuppliers('all');
+  if (name === 'campaigns') renderCampaigns();
+  if (name === 'escalations') renderEscalations();
+  if (name === 'intelligence') updateCharts();
 }
 
-const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)';
-const textColor = isDark ? '#888' : '#999';
-
-new Chart(document.getElementById('regionChart'), {
-  type: 'bar',
-  data: {
-    labels: ['N. America', 'Europe', 'Asia Pac', 'India', 'Mexico'],
-    datasets: [{ data: [89,82,71,74,85], backgroundColor: isDark ? '#185FA5' : '#378ADD', borderRadius: 4 }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11}}}, y:{min:50,max:100,grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>v+'%'}} } }
-});
-
-new Chart(document.getElementById('trendChart'), {
-  type: 'line',
-  data: {
-    labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-    datasets: [{ data:[61,65,70,74,76,78], borderColor:'#639922', backgroundColor:isDark?'rgba(99,153,34,0.15)':'rgba(99,153,34,0.08)', fill:true, tension:0.4, pointRadius:4, pointBackgroundColor:'#639922' }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11}}}, y:{min:50,max:90,grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>v+'%'}} } }
-});
-
-new Chart(document.getElementById('tierChart'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Tier 1 — 91%','Tier 2 — 68%','Tier 3 — 54%'],
-    datasets: [{ data:[91,68,54], backgroundColor:['#639922','#BA7517','#E24B4A'], borderWidth:0 }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom',labels:{font:{size:11},color:textColor,boxWidth:10,padding:12}}} }
-});
-
-new Chart(document.getElementById('perfChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Q1 Risk','Q2 Contact','Q3 Compl','Q4 Risk','Annual'],
-    datasets: [{ data:[72,78,85,88,94], backgroundColor:isDark?'#185FA5':'#378ADD', borderRadius:4 }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11}}}, y:{min:60,max:100,grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>v+'%'}} } }
-});
-
-new Chart(document.getElementById('contactChart'), {
-  type: 'bar',
-  indexAxis: 'y',
-  data: {
-    labels: ['N. America','Europe','Mexico','India','Asia Pacific'],
-    datasets: [{ data:[96,92,91,83,78], backgroundColor:isDark?'#185FA5':'#378ADD', borderRadius:4 }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-    scales:{ x:{min:60,max:100,grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>v+'%'}}, y:{grid:{display:false},ticks:{color:textColor,font:{size:11}}} } }
-});
+// Init
+updateMetrics();
+renderActivity();
+renderCampaigns();
+renderEscalations();
+populateRegionFilter();
+filterSuppliers('all');
 </script>
 </body>
 </html>
