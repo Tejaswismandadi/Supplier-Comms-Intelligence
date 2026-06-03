@@ -137,7 +137,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     </div>
   </div>
   <div class="topbar-right">
-    <span class="live-badge"><i class="ti ti-circle-check" style="font-size:10px"></i> Demo mode</span>
+    <button class="btn" onclick="toggleDemo()" id="demo-btn" style="font-size:11px;background:var(--greenbg);color:var(--greentext);border-color:var(--green)"><i class="ti ti-circle-check" style="font-size:10px"></i> Demo mode — click to clear</button>
     <button class="btn" onclick="openModal('welcome')" style="font-size:11px"><i class="ti ti-info-circle"></i> How this works</button>
     <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
   </div>
@@ -692,11 +692,6 @@ function updateAll() {
 
   updateCharts();
   updateGap();
-  renderActivity();
-  renderREI();
-  renderSup(suppliers);
-  renderCampaigns();
-  renderEsc();
 }
 
 function updateCharts() {
@@ -871,6 +866,31 @@ Foshan Manufacturing,Asia Pacific,Tier 2,20,1,No,320,Yes,2,Wei Zhang,,Not Regist
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='supplier-template.csv';a.click();
 }
 
+
+function toggleDemo() {
+  const btn = document.getElementById('demo-btn');
+  if(suppliers.length > 0 && suppliers[0].name === 'Bosch GmbH') {
+    // Switch to live mode — clear all data
+    if(confirm('Clear demo data and start fresh with your own suppliers?')) {
+      suppliers = [];
+      campaigns = [];
+      activity = [];
+      btn.innerHTML = '<i class="ti ti-edit" style="font-size:10px"></i> Live mode — add your suppliers';
+      btn.style.background = 'var(--bluebg)';
+      btn.style.color = 'var(--bluetext)';
+      btn.style.borderColor = 'var(--blue)';
+      updateAll();
+      renderREI();
+      renderSup(suppliers);
+      renderCampaigns();
+      renderEsc();
+      renderActivity();
+    }
+  } else {
+    // Reload demo data
+    location.reload();
+  }
+}
 function openModal(t){var el=document.getElementById('modal-'+t);if(el){el.style.display='';el.classList.add('open');}}
 function showPage(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -878,6 +898,11 @@ function showPage(n,el){
   document.getElementById('page-'+n).classList.add('active');
   if(el)el.classList.add('active');
   updateAll();
+  renderREI();
+  renderSup(suppliers);
+  renderCampaigns();
+  renderEsc();
+  renderActivity();
 }
 function toggleHelp(el){
   el.classList.toggle('open');
@@ -887,6 +912,11 @@ function toggleHelp(el){
 
 window.addEventListener('load', function() {
   updateAll();
+  renderREI();
+  renderSup(suppliers);
+  renderCampaigns();
+  renderEsc();
+  renderActivity();
 });
 </script>
 </body>
