@@ -647,13 +647,37 @@ function getSavedAt(){
   </div>
   <div class="card">
     <div class="card-title">Export and backup</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Export your current supplier data as a CSV to back up or share. Your data also saves automatically in this browser.</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn teal" onclick="exportSuppliers()"><i class="ti ti-download"></i> Export suppliers CSV</button>
-      <button class="btn" onclick="exportCampaigns()"><i class="ti ti-download"></i> Export campaigns JSON</button>
-      <button class="btn danger" onclick="if(confirm('Clear all saved data and reload with demo data?')){clearStorage();location.reload();}"><i class="ti ti-trash"></i> Reset all data</button>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Export a full backup of all your data. If you clear your browser cache or switch devices, import this file to restore everything exactly as you left it.</p>
+
+    <div style="background:var(--tealbg);color:var(--tealtext);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:14px">
+      <strong>Recommended:</strong> Use the full backup button regularly. One file saves everything — suppliers, REI scores, campaigns, statuses, and activity log.
     </div>
-    <div id="storage-status" style="margin-top:10px;font-size:11px;color:var(--text2)"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:12px;font-weight:500;margin-bottom:4px"><i class="ti ti-file-export" style="color:var(--teal)"></i> Full backup (recommended)</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Saves everything: suppliers, REI scores, campaigns, statuses, activity log. Import this file to restore completely.</div>
+        <button class="btn teal" onclick="exportFullBackup()" style="width:100%"><i class="ti ti-download"></i> Export full backup JSON</button>
+      </div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px">
+        <div style="font-size:12px;font-weight:500;margin-bottom:4px"><i class="ti ti-file-import" style="color:var(--blue)"></i> Restore from backup</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px">Upload a previously exported backup JSON file to restore all your suppliers, campaigns, and statuses.</div>
+        <button class="btn" onclick="document.getElementById('backup-inp').click()" style="width:100%;border-color:var(--blue);color:var(--blue)"><i class="ti ti-upload"></i> Import backup JSON</button>
+        <input type="file" id="backup-inp" accept=".json" style="display:none" onchange="importFullBackup(this)">
+      </div>
+    </div>
+
+    <div style="border-top:0.5px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Individual exports</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportSuppliers()"><i class="ti ti-download"></i> Suppliers CSV</button>
+        <button class="btn" onclick="exportCampaigns()"><i class="ti ti-download"></i> Campaigns JSON</button>
+        <button class="btn danger" onclick="if(confirm('Clear all saved data and reload with demo data?')){clearStorage();location.reload();}"><i class="ti ti-trash"></i> Reset all data</button>
+      </div>
+    </div>
+
+    <div id="storage-status" style="margin-top:12px;font-size:11px;color:var(--text2)"></div>
+    <div id="backup-result" style="margin-top:8px"></div>
   </div>
 </div>
 
@@ -1517,21 +1541,23 @@ Foshan Manufacturing,Asia Pacific,Tier 2,20,1,No,320,Yes,2,Wei Zhang,,Not Regist
 function toggleDemo(){
   const btn=document.getElementById('demo-btn');
   const isDemoData=suppliers.length>0&&suppliers[0].name==='Bosch GmbH';
-  const hasSavedData=getSavedAt()!==null;
   if(isDemoData){
-    if(confirm('Clear demo data and start with your own suppliers? Your data will save automatically.')){
+    if(confirm('Clear demo data and start with your own suppliers?\n\nYour data will save automatically in this browser.')){
       suppliers=[];campaigns=[];activity=[];
       clearStorage();
-      if(btn){btn.innerHTML='<i class="ti ti-edit" style="font-size:10px"></i> Live mode — data saves automatically';btn.style.background='var(--greenbg)';btn.style.color='var(--greentext)';btn.style.borderColor='var(--green)';}
+      if(btn){
+        btn.innerHTML='<i class="ti ti-circle-check" style="font-size:10px"></i> Live mode — data saves automatically';
+        btn.style.background='var(--greenbg)';
+        btn.style.color='var(--greentext)';
+        btn.style.borderColor='var(--green)';
+      }
       renderAll();
     }
-  }else if(hasSavedData){
-    if(confirm('Reset to demo data? This will clear all your saved suppliers and campaigns.')){
+  }else{
+    if(confirm('Reset to demo data?\n\nThis will clear all your saved suppliers and campaigns.')){
       clearStorage();
       location.reload();
     }
-  }else{
-    location.reload();
   }
 }
 
@@ -1584,6 +1610,73 @@ function renderGovTable(){
   }).join('');
 }
 
+function exportFullBackup(){
+  if(!suppliers.length && !campaigns.length){
+    alert('No data to export. Add suppliers first.');
+    return;
+  }
+  const backup = {
+    version: '1.0',
+    exported_at: new Date().toISOString(),
+    exported_by: 'Supplier Comms and Intelligence Program',
+    suppliers: suppliers,
+    campaigns: campaigns,
+    activity: activity.slice(0, 50),
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const filename = 'supplier_comms_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([json], {type:'application/json'}));
+  a.download = filename;
+  a.click();
+  // Show confirmation
+  const res = document.getElementById('backup-result');
+  if(res) res.innerHTML = '<div style="background:var(--greenbg);color:var(--greentext);padding:8px 12px;border-radius:var(--r);font-size:12px"><i class="ti ti-check"></i> Backup exported: ' + filename + ' — save this file somewhere safe</div>';
+}
+
+function importFullBackup(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const backup = JSON.parse(e.target.result);
+      // Validate it is a proper backup file
+      if(!backup.version || !backup.suppliers){
+        alert('Invalid backup file. Make sure you are uploading a file exported from this tool.');
+        return;
+      }
+      if(!confirm('Restore from backup dated ' + backup.exported_at.slice(0,10) + '?\n\n' + backup.suppliers.length + ' suppliers and ' + backup.campaigns.length + ' campaigns will be loaded.\n\nThis will replace your current data.')){
+        input.value = '';
+        return;
+      }
+      suppliers = backup.suppliers || [];
+      campaigns = backup.campaigns || [];
+      activity = backup.activity || [];
+      saveToStorage();
+      input.value = '';
+      // Update demo button
+      const btn = document.getElementById('demo-btn');
+      if(btn){
+        btn.innerHTML = '<i class="ti ti-circle-check" style="font-size:10px"></i> Data restored — click to reset to demo';
+        btn.style.background = 'var(--greenbg)';
+        btn.style.color = 'var(--greentext)';
+        btn.style.borderColor = 'var(--green)';
+      }
+      buildContactGov();
+      buildStakeholder();
+      renderAll();
+      setTimeout(updateCharts, 100);
+      const res = document.getElementById('backup-result');
+      if(res) res.innerHTML = '<div style="background:var(--greenbg);color:var(--greentext);padding:8px 12px;border-radius:var(--r);font-size:12px"><i class="ti ti-check"></i> Backup restored successfully — ' + suppliers.length + ' suppliers and ' + campaigns.length + ' campaigns loaded</div>';
+    }catch(err){
+      alert('Could not read backup file. Make sure it is a valid JSON file exported from this tool.');
+      input.value = '';
+    }
+  };
+  reader.readAsText(file);
+}
+
 function exportSuppliers(){
   if(!suppliers.length){alert('No suppliers to export');return;}
   const headers='Name,Region,Tier,TTR,TTS,Single Source,Spend ($K),Financial Risk,Performance,Contact Name,Contact Email,Portal Status,Segment,ESC Window';
@@ -1623,11 +1716,16 @@ function renderAll(){
   updateGap();
   renderGovTable();
   renderStakeholder();
-  // Auto-save to browser storage
-  saveToStorage();
-  // Update save indicator in topbar
-  const si = document.getElementById('save-indicator');
-  if(si) si.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  // Only auto-save if NOT demo data
+  const isDemo = suppliers.length>0 && suppliers[0].name==='Bosch GmbH';
+  if(!isDemo){
+    saveToStorage();
+    const si = document.getElementById('save-indicator');
+    if(si) si.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  } else {
+    const si = document.getElementById('save-indicator');
+    if(si) si.textContent = '';
+  }
   updateStorageStatus();
 }
 
@@ -1635,18 +1733,29 @@ function renderAll(){
 // INIT
 // ═══════════════════════════════════════════════
 window.addEventListener('load',function(){
-  // Check for saved data
-  const hasSaved = loadFromStorage();
-  if(hasSaved){
-    const savedAt = getSavedAt();
-    // Show saved data notification
-    const btn = document.getElementById('demo-btn');
-    if(btn){
-      btn.innerHTML='<i class="ti ti-device-floppy" style="font-size:10px"></i> Data saved '+savedAt+' — click to reset';
-      btn.style.background='var(--bluebg)';
-      btn.style.color='var(--bluetext)';
-      btn.style.borderColor='var(--blue)';
-    }
+  // Only restore saved data if it is not demo data
+  const savedRaw = localStorage.getItem('sci_suppliers');
+  let hasSaved = false;
+  if(savedRaw){
+    try{
+      const savedSups = JSON.parse(savedRaw);
+      // Only restore if it is real user data (not demo)
+      if(savedSups.length > 0 && savedSups[0].name !== 'Bosch GmbH'){
+        loadFromStorage();
+        hasSaved = true;
+        const savedAt = getSavedAt();
+        const btn = document.getElementById('demo-btn');
+        if(btn){
+          btn.innerHTML='<i class="ti ti-device-floppy" style="font-size:10px"></i> Your data loaded — click to reset to demo';
+          btn.style.background='var(--greenbg)';
+          btn.style.color='var(--greentext)';
+          btn.style.borderColor='var(--green)';
+        }
+      } else {
+        // Clear any saved demo data
+        clearStorage();
+      }
+    }catch(e){}
   }
   buildCalendar();
   buildRaci();
