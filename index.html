@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Supplier Communications & Intelligence Program</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -34,40 +36,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .brand-logo{width:30px;height:30px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
 .brand-title{font-size:14px;font-weight:500}
 .brand-sub{font-size:11px;color:var(--text2)}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.live-badge{font-size:11px;background:var(--greenbg);color:var(--greentext);padding:3px 9px;border-radius:20px;font-weight:500}
 .layout{display:flex;min-height:calc(100vh - 54px)}
-.sidebar{width:188px;background:var(--bg);border-right:0.5px solid var(--border);padding:1rem 0;flex-shrink:0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
-.nav-sect{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:1rem 0 4px}
-.nav-sect:first-child{margin-top:0}
-.nav-item{display:flex;align-items:center;gap:8px;padding:7px 1rem;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent}
+.sidebar{width:200px;background:var(--bg);border-right:0.5px solid var(--border);padding:.75rem 0;flex-shrink:0;position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto}
+.nav-sect{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 1rem;margin:.75rem 0 3px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:6px 1rem;font-size:12px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:all 0.15s}
 .nav-item:hover{background:var(--bg2);color:var(--text)}
-.nav-item.active{color:var(--text);background:var(--bg2);border-left-color:var(--text);font-weight:500}
-.nav-item i{font-size:15px}
-.nb{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600}
+.nav-item.active{color:var(--text);background:var(--bg2);border-left-color:var(--teal);font-weight:500}
+.nav-item i{font-size:14px;flex-shrink:0}
+.nb{margin-left:auto;font-size:10px;padding:1px 5px;border-radius:8px;font-weight:600}
 .nb-r{background:var(--redbg);color:var(--redtext)}
 .nb-g{background:var(--greenbg);color:var(--greentext)}
 .nb-b{background:var(--bluebg);color:var(--bluetext)}
-.main{flex:1;padding:1.25rem 1.5rem;overflow-y:auto}
+.nb-t{background:var(--tealbg);color:var(--tealtext)}
+.main{flex:1;padding:1.25rem 1.5rem;overflow-y:auto;min-width:0}
 .page{display:none}.page.active{display:block}
 .page-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem}
 .page-title{font-size:18px;font-weight:500}
 .page-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;font-size:12px;border-radius:var(--r);border:0.5px solid var(--border2);background:none;cursor:pointer;color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;border-radius:var(--r);border:0.5px solid var(--border2);background:none;cursor:pointer;color:var(--text);transition:all 0.15s}
 .btn:hover{background:var(--bg2)}
 .btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
 .btn.primary:hover{opacity:.85}
-.btn.danger{background:var(--redbg);color:var(--redtext);border-color:var(--red)}
+.btn.teal{background:var(--teal);color:#fff;border-color:var(--teal)}
 .btn i{font-size:13px}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.25rem}
-.metric{background:var(--bg2);border-radius:var(--r);padding:12px 14px}
+.metric{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:12px 14px}
 .metric-label{font-size:10px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
 .metric-value{font-size:24px;font-weight:500;line-height:1}
-.metric-value.g{color:var(--green)}.metric-value.a{color:var(--amber)}.metric-value.r{color:var(--red)}.metric-value.t{color:var(--teal)}
-.metric-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.g{color:var(--green)}.a{color:var(--amber)}.r{color:var(--red)}.t{color:var(--teal)}.b{color:var(--blue)}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:3px}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rlg);padding:1rem 1.25rem;margin-bottom:1rem}
 .card-title{font-size:11px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap}
 .bg{background:var(--greenbg);color:var(--greentext)}
 .ba{background:var(--amberbg);color:var(--ambertext)}
 .br{background:var(--redbg);color:var(--redtext)}
@@ -75,11 +75,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bt{background:var(--tealbg);color:var(--tealtext)}
 .bp{background:var(--purpbg);color:var(--purptext)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
-.chart-wrap{position:relative;height:200px;min-height:200px}
-.chart-wrap canvas{width:100%!important;height:200px!important}
+.chart-wrap{position:relative;height:210px;width:100%}
+.chart-wrap canvas{max-height:210px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;font-size:10px;font-weight:500;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:0.5px solid var(--border)}
-td{padding:9px 10px;border-bottom:0.5px solid var(--border);vertical-align:middle}
+th{text-align:left;font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:0.5px solid var(--border);white-space:nowrap}
+td{padding:8px 10px;border-bottom:0.5px solid var(--border);vertical-align:top}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
 input,select,textarea{padding:6px 10px;border:0.5px solid var(--border2);border-radius:var(--r);font-size:12px;background:var(--bg);color:var(--text);width:100%}
@@ -90,42 +90,58 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 .modal-bd{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;align-items:center;justify-content:center}
 .modal-bd.open{display:flex}
 .modal{background:var(--bg);border-radius:var(--rlg);padding:1.5rem;width:520px;max-width:95vw;border:0.5px solid var(--border);max-height:90vh;overflow-y:auto}
-.modal-title{font-size:16px;font-weight:500;margin-bottom:1rem}
+.modal-title{font-size:15px;font-weight:500;margin-bottom:1rem}
 .modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem}
 .irow{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
 .irow:last-child{border-bottom:none}
 .adot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.prog-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0 3px}
-.prog-fill{height:100%;border-radius:3px}
-.help-bar{border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px;cursor:pointer}
-.help-bar i{font-size:16px;flex-shrink:0;margin-top:1px}
-.help-detail{display:none;margin-top:8px;border-top:0.5px solid rgba(0,0,0,0.1);padding-top:8px}
+.prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:4px 0}
+.prog-fill{height:100%;border-radius:3px;transition:width 0.4s}
+.help-bar{border-radius:var(--r);padding:9px 14px;font-size:12px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px;cursor:pointer;user-select:none}
+.help-bar i.ti-chevron-down{font-size:13px;flex-shrink:0;margin-top:1px;transition:transform 0.2s}
+.help-bar.open i.ti-chevron-down{transform:rotate(180deg)}
+.help-detail{display:none;margin-top:8px;border-top:0.5px solid rgba(0,0,0,0.12);padding-top:8px}
 .help-bar.open .help-detail{display:block}
 .help-io{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
-.help-col{background:rgba(0,0,0,0.04);border-radius:6px;padding:8px 10px}
-.help-col-title{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-.step-flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:1rem 0}
-.step-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:10px;text-align:center}
-.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;margin:0 auto 6px}
-.rei-pyramid{display:flex;flex-direction:column;gap:4px;align-items:center;margin:1rem 0}
-.rei-tier{display:flex;align-items:center;justify-content:center;border-radius:4px;padding:8px 14px;font-size:11px;font-weight:500}
-.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--rlg);padding:2rem;text-align:center;cursor:pointer;color:var(--text2)}
+.help-col{background:rgba(0,0,0,0.05);border-radius:6px;padding:8px 10px}
+.help-col-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--text2)}
+.empty i{font-size:36px;color:var(--text3);margin-bottom:.5rem;display:block}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--rlg);padding:2rem;text-align:center;cursor:pointer;color:var(--text2);transition:background 0.15s}
 .upload-zone:hover{background:var(--bg2)}
 .upload-zone i{font-size:28px;display:block;margin-bottom:.5rem;color:var(--text3)}
-.empty{text-align:center;padding:2rem 1rem;color:var(--text2)}
-.empty i{font-size:36px;color:var(--text3);margin-bottom:.5rem;display:block}
-.welcome-hero{background:var(--navy);border-radius:var(--rlg);padding:1.5rem;margin-bottom:1.25rem;color:#fff}
-.welcome-hero h2{font-size:20px;font-weight:500;margin-bottom:4px}
-.welcome-hero p{font-size:13px;color:#93C5D0;line-height:1.6}
-.tab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:1rem}
-.tab-card{background:rgba(255,255,255,0.08);border-radius:var(--r);padding:12px;cursor:pointer}
-.tab-card:hover{background:rgba(255,255,255,0.14)}
-.tab-card-icon{font-size:18px;margin-bottom:6px}
-.tab-card-title{font-size:12px;font-weight:500;color:#fff;margin-bottom:3px}
-.tab-card-desc{font-size:11px;color:#93C5D0}
-@media(max-width:700px){.sidebar{display:none}.main{padding:1rem}.grid2{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
+.rei-pyramid{display:flex;flex-direction:column;gap:5px;align-items:center;margin:1rem 0}
+.rei-tier{display:flex;align-items:center;justify-content:center;border-radius:5px;padding:9px 14px;font-size:11px;font-weight:500;cursor:pointer;transition:opacity 0.15s}
+.rei-tier:hover{opacity:.85}
+.step-flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:1rem 0}
+.step-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--r);padding:10px;text-align:center}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;margin:0 auto 6px}
+.timeline-bar{height:22px;border-radius:3px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;cursor:default}
+.raci-r{background:#1E3A5F;color:#fff;text-align:center;font-weight:700;font-size:11px}
+.raci-a{background:#0D9488;color:#fff;text-align:center;font-weight:700;font-size:11px}
+.raci-c{background:#E6F1FB;color:#0C447C;text-align:center;font-size:11px}
+.raci-i{background:#f5f5f4;color:#6b6b6b;text-align:center;font-size:11px}
+.raci-empty{text-align:center;font-size:11px;color:var(--text3)}
+.gantt-grid{display:grid;grid-template-columns:160px repeat(12,1fr);gap:1px;background:var(--border);border-radius:var(--r);overflow:hidden;font-size:10px}
+.gantt-hdr{background:var(--navy);color:#fff;padding:5px 4px;text-align:center;font-weight:600;font-size:9px}
+.gantt-label{background:var(--bg);padding:5px 8px;display:flex;align-items:center;font-size:11px;font-weight:500}
+.gantt-cell{background:var(--bg);padding:2px}
+.gantt-fill{height:18px;border-radius:2px;width:100%}
+.gov-step{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:0.5px solid var(--border)}
+.gov-step:last-child{border-bottom:none}
+.gov-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff}
+.comp-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rlg);padding:1rem 1.25rem;margin-bottom:10px}
+.welcome-hero{background:linear-gradient(135deg,#1E3A5F 0%,#0D9488 100%);border-radius:var(--rlg);padding:1.5rem;margin-bottom:1.25rem;color:#fff}
+.tab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-top:1rem}
+.tab-card{background:rgba(255,255,255,0.1);border-radius:var(--r);padding:10px;cursor:pointer;border:0.5px solid rgba(255,255,255,0.15)}
+.tab-card:hover{background:rgba(255,255,255,0.18)}
+.tab-card-title{font-size:11px;font-weight:500;color:#fff;margin:5px 0 3px}
+.tab-card-desc{font-size:10px;color:rgba(255,255,255,0.7)}
+@media(max-width:768px){.sidebar{display:none}.main{padding:1rem}.grid2{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 </style>
-<script>function closeModal(t){var el=document.getElementById("modal-"+t);if(el){el.classList.remove("open");el.style.display="none";}}</script>
+<script>
+function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.classList.remove('open');el.style.display='';}}
+</script>
 </head>
 <body>
 
@@ -137,8 +153,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
       <div class="brand-sub" id="topbar-sub">15 suppliers · 1 active campaign</div>
     </div>
   </div>
-  <div class="topbar-right">
-    <button class="btn" onclick="toggleDemo()" id="demo-btn" style="font-size:11px;background:var(--greenbg);color:var(--greentext);border-color:var(--green)"><i class="ti ti-circle-check" style="font-size:10px"></i> Demo mode — click to clear</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="btn" id="demo-btn" onclick="toggleDemo()" style="font-size:11px;background:var(--greenbg);color:var(--greentext);border-color:var(--green)"><i class="ti ti-circle-check" style="font-size:10px"></i> Demo mode — click to clear</button>
     <button class="btn" onclick="openModal('welcome')" style="font-size:11px"><i class="ti ti-info-circle"></i> How this works</button>
     <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
   </div>
@@ -146,71 +162,163 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 
 <div class="layout">
 <nav class="sidebar">
-  <div class="nav-sect">Program</div>
-  <div class="nav-item active" onclick="showPage('overview',this)"><i class="ti ti-layout-dashboard"></i> Overview</div>
+  <div class="nav-sect">Strategy</div>
+  <div class="nav-item active" onclick="showPage('overview',this)"><i class="ti ti-layout-dashboard"></i> Program Overview</div>
+  <div class="nav-item" onclick="showPage('calendar',this)"><i class="ti ti-calendar"></i> Campaign Calendar</div>
+  <div class="nav-item" onclick="showPage('raci',this)"><i class="ti ti-users"></i> RACI Matrix</div>
+  <div class="nav-item" onclick="showPage('timeline',this)"><i class="ti ti-timeline"></i> Program Timeline</div>
+  <div class="nav-sect">Operations</div>
   <div class="nav-item" onclick="showPage('rei',this)"><i class="ti ti-chart-radar"></i> REI Scoring <span class="nb nb-b" id="nb-rei">15</span></div>
   <div class="nav-item" onclick="showPage('suppliers',this)"><i class="ti ti-building-factory"></i> Supplier Master <span class="nb nb-g" id="nb-sup">15</span></div>
   <div class="nav-item" onclick="showPage('tracker',this)"><i class="ti ti-speakerphone"></i> Campaign Tracker</div>
   <div class="nav-item" onclick="showPage('escalation',this)"><i class="ti ti-alert-triangle"></i> Escalation Log <span class="nb nb-r" id="nb-esc">2</span></div>
   <div class="nav-sect">Intelligence</div>
+  <div class="nav-item" onclick="showPage('dashboard',this)"><i class="ti ti-chart-bar"></i> Dashboard</div>
   <div class="nav-item" onclick="showPage('trend',this)"><i class="ti ti-trending-up"></i> Trend Analysis</div>
   <div class="nav-item" onclick="showPage('compliance',this)"><i class="ti ti-shield-check"></i> Compliance</div>
+  <div class="nav-sect">Governance</div>
+  <div class="nav-item" onclick="showPage('contact_gov',this)"><i class="ti ti-address-book"></i> Contact Governance</div>
+  <div class="nav-item" onclick="showPage('stakeholder',this)"><i class="ti ti-sitemap"></i> Stakeholder Comms</div>
   <div class="nav-sect">Setup</div>
-  <div class="nav-item" onclick="showPage('import',this)"><i class="ti ti-upload"></i> Import data</div>
-  <div class="nav-item" onclick="showPage('guide',this)"><i class="ti ti-book"></i> How it works</div>
+  <div class="nav-item" onclick="showPage('import',this)"><i class="ti ti-upload"></i> Import Data</div>
+  <div class="nav-item" onclick="showPage('guide',this)"><i class="ti ti-book"></i> How It Works</div>
 </nav>
 
 <main class="main">
 
-<!-- OVERVIEW -->
+<!-- ═══════════════════════════════════════════════
+     STRATEGY: PROGRAM OVERVIEW
+════════════════════════════════════════════════ -->
 <div id="page-overview" class="page active">
   <div class="help-bar" style="background:var(--tealbg);color:var(--tealtext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Overview tab</strong> — Program health dashboard. All metrics update live as you change supplier statuses in the Campaign Tracker.
+    <div style="flex:1"><strong>Program Overview</strong> — Live program health dashboard. All metrics update automatically as you change supplier statuses in Campaign Tracker.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Input (automatic)</div>Supplier statuses from Campaign Tracker · REI segments from Scoring tab · Campaign data</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Output</div>Response rate · Escalation count · Segment distribution chart · Gap analysis with recommended actions · Activity log</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Inputs (auto)</div>Supplier statuses from Campaign Tracker · REI segments from Scoring · Campaign data</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Outputs</div>Response rate · Escalation count · Segment distribution · Gap analysis · Activity log</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
   <div class="page-hdr">
-    <div><div class="page-title">Overview</div><div class="page-sub" id="ov-sub">Q2 Compliance Campaign active · Updated today</div></div>
+    <div><div class="page-title">Program Overview</div><div class="page-sub" id="ov-sub">Q2 Compliance Campaign active · Updated today</div></div>
   </div>
   <div class="metrics">
     <div class="metric"><div class="metric-label">Total suppliers</div><div class="metric-value" id="m-total">15</div><div class="metric-sub">in master list</div></div>
-    <div class="metric"><div class="metric-label">Response rate</div><div class="metric-value g" id="m-rate">67%</div><div class="metric-sub" id="m-rate-sub">Q2 compliance</div></div>
+    <div class="metric"><div class="metric-label">Response rate</div><div class="metric-value g" id="m-rate">67%</div><div class="metric-sub">Q2 compliance</div></div>
     <div class="metric"><div class="metric-label">Pending</div><div class="metric-value a" id="m-pending">3</div><div class="metric-sub">awaiting response</div></div>
     <div class="metric"><div class="metric-label">Escalated</div><div class="metric-value r" id="m-esc">2</div><div class="metric-sub">require action</div></div>
     <div class="metric"><div class="metric-label">Critical P1</div><div class="metric-value r" id="m-p1">3</div><div class="metric-sub">7-day window</div></div>
     <div class="metric"><div class="metric-label">Watch list</div><div class="metric-value a" id="m-watch">2</div><div class="metric-sub">immediate review</div></div>
   </div>
   <div class="grid2">
-    <div class="card"><div class="card-title">Response rate by region</div><div class="chart-wrap"><canvas id="regionChart" role="img" aria-label="Bar chart showing response rates by region">Response rates by region.</canvas></div></div>
-    <div class="card"><div class="card-title">Supplier portfolio by REI segment</div><div class="chart-wrap"><canvas id="segChart" role="img" aria-label="Doughnut chart showing supplier distribution by REI segment">Supplier distribution by segment.</canvas></div></div>
+    <div class="card"><div class="card-title">Response rate by region</div><div class="chart-wrap"><canvas id="regionChart"></canvas></div></div>
+    <div class="card"><div class="card-title">Supplier portfolio by REI segment</div><div class="chart-wrap"><canvas id="segChart"></canvas></div></div>
   </div>
   <div class="card"><div class="card-title">Gap analysis — auto-generated from live data</div><div id="gap-analysis"></div></div>
   <div class="card"><div class="card-title">Recent activity</div><div id="activity-log"></div></div>
 </div>
 
-<!-- REI SCORING -->
-<div id="page-rei" class="page">
+<!-- ═══════════════════════════════════════════════
+     STRATEGY: CAMPAIGN CALENDAR
+════════════════════════════════════════════════ -->
+<div id="page-calendar" class="page">
   <div class="help-bar" style="background:var(--bluebg);color:var(--bluetext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>REI Scoring tab</strong> — Simchi-Levi Risk Exposure Index. Score every supplier before launching any campaign. This is Step 1 — everything else depends on it.
+    <div style="flex:1"><strong>Campaign Calendar</strong> — Annual plan for all supplier outreach. Designed before the year starts, reviewed with sourcing and compliance teams.
       <div class="help-detail">
-        <div style="margin-bottom:8px"><strong>REI = Time to Recover (TTR) minus Time to Survive (TTS)</strong><br>Positive REI = critical risk. Supplier takes longer to recover than you can survive without them.</div>
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Your inputs</div>TTR: weeks to find alternate source · TTS: weeks production continues · Annual spend · Single source flag · Financial risk flag · Performance score (1-5)</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Auto-calculated outputs</div>REI score (TTR minus TTS) · Composite risk score (weighted formula) · Segment: Critical P1 / Strategic P2 / Preferred P3 / Approved P4 / Watch List · Escalation window per segment</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Input</div>Campaign type · Target segment · Owner · Frequency · Collection window · Escalation trigger rule</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Output</div>Full annual campaign plan · Aligned with compliance deadlines · Escalation windows set per REI segment</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">Campaign Calendar</div><div class="page-sub">Annual outreach program — 12 campaigns across 4 types</div></div></div>
+  <div id="calendar-content"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     STRATEGY: RACI MATRIX
+════════════════════════════════════════════════ -->
+<div id="page-raci" class="page">
+  <div class="help-bar" style="background:var(--purpbg);color:var(--purptext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>RACI Matrix</strong> — Defines who is Responsible, Accountable, Consulted, and Informed for every program activity. Eliminates ambiguity across sourcing, compliance, quality, IT, and finance.
+      <div class="help-detail">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px">
+          <div style="background:var(--bg2);border-radius:5px;padding:8px;text-align:center"><div style="font-weight:700;color:#1E3A5F;font-size:13px">R</div><div style="font-size:10px;color:var(--text2)">Responsible — does the work</div></div>
+          <div style="background:var(--bg2);border-radius:5px;padding:8px;text-align:center"><div style="font-weight:700;color:#0D9488;font-size:13px">A</div><div style="font-size:10px;color:var(--text2)">Accountable — owns the outcome</div></div>
+          <div style="background:var(--bg2);border-radius:5px;padding:8px;text-align:center"><div style="font-weight:700;color:#0C447C;font-size:13px">C</div><div style="font-size:10px;color:var(--text2)">Consulted — provides input</div></div>
+          <div style="background:var(--bg2);border-radius:5px;padding:8px;text-align:center"><div style="font-weight:700;color:#6b6b6b;font-size:13px">I</div><div style="font-size:10px;color:var(--text2)">Informed — kept updated</div></div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">RACI Matrix</div><div class="page-sub">Roles and responsibilities across all program activities</div></div></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto">
+      <table id="raci-table">
+        <thead>
+          <tr>
+            <th style="min-width:200px">Activity</th>
+            <th style="text-align:center;min-width:90px">Program Manager</th>
+            <th style="text-align:center;min-width:90px">Category Manager</th>
+            <th style="text-align:center;min-width:90px">Compliance Team</th>
+            <th style="text-align:center;min-width:90px">Quality Eng</th>
+            <th style="text-align:center;min-width:90px">IT / Data</th>
+            <th style="text-align:center;min-width:90px">Finance</th>
+            <th style="text-align:center;min-width:90px">Leadership</th>
+          </tr>
+        </thead>
+        <tbody id="raci-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     STRATEGY: PROGRAM TIMELINE
+════════════════════════════════════════════════ -->
+<div id="page-timeline" class="page">
+  <div class="help-bar" style="background:var(--amberbg);color:var(--ambertext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>Program Timeline</strong> — Full-year Gantt view of all campaigns. Shows when each campaign runs, who owns it, and which quarter it falls in.
+      <div class="help-detail">
+        <div class="help-io">
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">How to read</div>Each row = one campaign. Colored bars show which months it runs. Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec.</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Color key</div>Blue = Regulatory Compliance · Green = Risk and Financial Health · Amber = Corrective Action · Purple = Contact and Master Data</div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">Program Timeline</div><div class="page-sub">Full-year campaign schedule — Jan to Dec 2026</div></div></div>
+  <div class="card" style="padding:1rem;overflow-x:auto">
+    <div id="timeline-content" style="min-width:800px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     OPERATIONS: REI SCORING
+════════════════════════════════════════════════ -->
+<div id="page-rei" class="page">
+  <div class="help-bar" style="background:var(--bluebg);color:var(--bluetext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>REI Scoring — Step 1</strong> — Simchi-Levi Risk Exposure Index. Score every supplier before launching any campaign. Everything else depends on this.
+      <div class="help-detail">
+        <div style="background:var(--bg2);border-radius:5px;padding:8px;margin-bottom:8px;font-size:12px"><strong>REI = TTR minus TTS</strong> · Positive REI = supplier takes longer to recover than you can survive without them = critical risk</div>
+        <div class="help-io">
+          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Your inputs</div>TTR: weeks to find alternate source · TTS: weeks production continues · Annual spend · Single source flag · Financial risk flag · Performance score 1-5</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Auto-calculated</div>REI score · Composite risk score · Segment: Critical P1 / Strategic P2 / Preferred P3 / Approved P4 / Watch List · Escalation window</div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
   </div>
   <div class="page-hdr">
     <div><div class="page-title">REI Scoring</div><div class="page-sub">Simchi-Levi Risk Exposure Index — foundation of the entire program</div></div>
@@ -218,235 +326,277 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
   </div>
   <div class="grid2">
     <div class="card">
-      <div class="card-title">Segment pyramid — 15 suppliers scored</div>
+      <div class="card-title">Segment pyramid</div>
       <div class="rei-pyramid">
-        <div class="rei-tier" style="width:55%;background:var(--redbg);color:var(--redtext)" id="tier-p1">Critical P1 — 3 suppliers — 7 days</div>
-        <div class="rei-tier" style="width:68%;background:var(--amberbg);color:var(--ambertext)" id="tier-p2">Strategic P2 — 7 suppliers — 14 days</div>
-        <div class="rei-tier" style="width:81%;background:var(--bluebg);color:var(--bluetext)" id="tier-p3">Preferred P3 — 1 supplier — 21 days</div>
-        <div class="rei-tier" style="width:94%;background:var(--greenbg);color:var(--greentext)" id="tier-p4">Approved P4 — 0 suppliers — 30 days</div>
-        <div class="rei-tier" style="width:94%;background:var(--purpbg);color:var(--purptext)" id="tier-wl">Watch List — 2 suppliers — Immediate</div>
+        <div class="rei-tier" style="width:52%;background:var(--redbg);color:var(--redtext)" id="tier-p1">Critical P1 — 0 — 7 days</div>
+        <div class="rei-tier" style="width:65%;background:var(--amberbg);color:var(--ambertext)" id="tier-p2">Strategic P2 — 0 — 14 days</div>
+        <div class="rei-tier" style="width:78%;background:var(--bluebg);color:var(--bluetext)" id="tier-p3">Preferred P3 — 0 — 21 days</div>
+        <div class="rei-tier" style="width:91%;background:var(--greenbg);color:var(--greentext)" id="tier-p4">Approved P4 — 0 — 30 days</div>
+        <div class="rei-tier" style="width:91%;background:var(--purpbg);color:var(--purptext)" id="tier-wl">Watch List — 0 — Immediate</div>
       </div>
-      <div style="font-size:11px;color:var(--text2);text-align:center">Composite score = REI 35% + Single source 25% + Spend 20% + Financial risk 10% + Performance 10%</div>
+      <div style="font-size:10px;color:var(--text2);text-align:center;margin-top:4px">Composite = REI 35% + Single source 25% + Spend 20% + Fin risk 10% + Performance 10%</div>
     </div>
-    <div class="card"><div class="card-title">REI score by supplier</div><div class="chart-wrap"><canvas id="reiChart" role="img" aria-label="Bar chart showing REI scores per supplier">REI scores.</canvas></div></div>
+    <div class="card"><div class="card-title">REI score by supplier</div><div class="chart-wrap"><canvas id="reiChart"></canvas></div></div>
   </div>
   <div class="card" style="padding:0;overflow:hidden">
-    <table>
-      <thead><tr><th>Supplier</th><th>Region</th><th>TTR</th><th>TTS</th><th>REI</th><th>Single?</th><th>Spend ($K)</th><th>Fin Risk</th><th>Composite</th><th>Segment</th><th>Esc Window</th></tr></thead>
-      <tbody id="rei-tbody"></tbody>
-    </table>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Supplier</th><th>Region</th><th>TTR</th><th>TTS</th><th style="text-align:center">REI</th><th style="text-align:center">Single?</th><th>Spend ($K)</th><th style="text-align:center">Fin Risk</th><th style="text-align:center">Composite</th><th>Segment</th><th>Esc Window</th></tr></thead>
+        <tbody id="rei-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
-<!-- SUPPLIER MASTER -->
+<!-- ═══════════════════════════════════════════════
+     OPERATIONS: SUPPLIER MASTER
+════════════════════════════════════════════════ -->
 <div id="page-suppliers" class="page">
   <div class="help-bar" style="background:var(--greenbg);color:var(--greentext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Supplier Master tab</strong> — Complete contact database. Segment and escalation window pull automatically from REI Scoring. This is Step 2.
+    <div style="flex:1"><strong>Supplier Master — Step 2</strong> — Complete contact database. Segment and escalation window pull from REI Scoring automatically.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Your inputs</div>Contact name · Contact email · Backup contact · Portal registration status · Notes</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Auto-pulled from REI tab</div>Supplier segment · Escalation window · Region · Tier · Missing email flags in red automatically</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Your inputs</div>Contact name · Email · Backup contact · Portal status · Notes</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Auto from REI</div>Segment · Escalation window · Missing email flags in red</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
   <div class="page-hdr">
-    <div><div class="page-title">Supplier Master</div><div class="page-sub" id="sup-sub">15 suppliers · 2 missing emails · Segment from REI scoring</div></div>
-    <div style="display:flex;gap:8px">
-      <select style="width:auto;font-size:12px" onchange="filterSup(this.value)">
-        <option value="all">All segments</option>
-        <option value="Critical / P1">Critical P1</option>
-        <option value="Strategic / P2">Strategic P2</option>
-        <option value="Preferred / P3">Preferred P3</option>
-        <option value="Watch List">Watch List</option>
-      </select>
-    </div>
+    <div><div class="page-title">Supplier Master</div><div class="page-sub" id="sup-sub">15 suppliers · Segment from REI scoring</div></div>
+    <select style="width:auto;font-size:12px;width:160px" onchange="filterSup(this.value)">
+      <option value="all">All segments</option>
+      <option value="Critical / P1">Critical P1</option>
+      <option value="Strategic / P2">Strategic P2</option>
+      <option value="Preferred / P3">Preferred P3</option>
+      <option value="Approved / P4">Approved P4</option>
+      <option value="Watch List">Watch List</option>
+    </select>
   </div>
   <div class="card" style="padding:0;overflow:hidden">
-    <table>
-      <thead><tr><th>Supplier</th><th>Region</th><th>Tier</th><th>Segment</th><th>Contact</th><th>Email</th><th>Portal</th><th>Esc Window</th></tr></thead>
-      <tbody id="sup-tbody"></tbody>
-    </table>
+    <div style="overflow-x:auto"><table><thead><tr><th>Supplier</th><th>Region</th><th>Tier</th><th>Segment</th><th>Contact</th><th>Email</th><th>Portal</th><th>Esc Window</th></tr></thead><tbody id="sup-tbody"></tbody></table></div>
   </div>
 </div>
 
-<!-- CAMPAIGN TRACKER -->
+<!-- ═══════════════════════════════════════════════
+     OPERATIONS: CAMPAIGN TRACKER
+════════════════════════════════════════════════ -->
 <div id="page-tracker" class="page">
   <div class="help-bar" style="background:var(--amberbg);color:var(--ambertext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Campaign Tracker tab</strong> — Daily operations. This is Step 4. Update the STATUS dropdown for each supplier as they respond. Everything else is automatic.
+    <div style="flex:1"><strong>Campaign Tracker — Step 4</strong> — Daily operations sheet. Update the STATUS dropdown only. Everything else is automatic.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Your only input</div>STATUS: Responded / Pending / Escalated — change this dropdown as suppliers submit data</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Auto-calculated outputs</div>Response rate · Escalation flags (trigger per REI segment window) · Dashboard metrics · Escalation log population</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Your only input</div>STATUS: Responded / Pending / Escalated — update as suppliers submit data</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Auto-calculated</div>Response rate · Escalation flags per REI segment window · Dashboard metrics · Escalation log</div>
         </div>
         <div style="margin-top:8px;font-size:11px">Escalation windows: P1 = 7 days · P2 = 14 days · P3 = 21 days · P4 = 30 days · Watch List = Immediate</div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
   <div class="page-hdr">
-    <div><div class="page-title">Campaign Tracker</div><div class="page-sub">Update STATUS column only — all other data pulls automatically</div></div>
+    <div><div class="page-title">Campaign Tracker</div><div class="page-sub">Update STATUS only — all other data pulls automatically from Supplier Master</div></div>
     <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
   </div>
   <div id="campaigns-list"></div>
 </div>
 
-<!-- ESCALATION LOG -->
+<!-- ═══════════════════════════════════════════════
+     OPERATIONS: ESCALATION LOG
+════════════════════════════════════════════════ -->
 <div id="page-escalation" class="page">
   <div class="help-bar" style="background:var(--redbg);color:var(--redtext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Escalation Log tab</strong> — Suppliers marked Escalated populate here automatically. This is Step 5 — your daily action list. Document every action with a date.
+    <div style="flex:1"><strong>Escalation Log — Step 5</strong> — Suppliers marked Escalated populate here automatically. Your daily action list. Document every action with a date.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--redtext)">Auto-populated from tracker</div>Supplier name · Region · Tier · Segment · Contact email · Escalation window</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--redtext)">Your inputs</div>Action taken (document with date) · Category manager assigned · Resolution status · Next action and date</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--redtext)">Auto-populated</div>Supplier name · Region · Tier · Segment · Email · Escalation window · Days since outreach</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--redtext)">Your inputs</div>Action taken with date · Category manager assigned · Resolution status · Next action and date</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
-  <div class="page-hdr"><div><div class="page-title">Escalation log</div><div class="page-sub" id="esc-sub">2 suppliers requiring immediate action</div></div></div>
+  <div class="page-hdr"><div><div class="page-title">Escalation Log</div><div class="page-sub" id="esc-sub">2 suppliers requiring immediate action</div></div></div>
   <div id="esc-list"></div>
 </div>
 
-<!-- TREND ANALYSIS -->
+<!-- ═══════════════════════════════════════════════
+     INTELLIGENCE: DASHBOARD
+════════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="help-bar" style="background:var(--tealbg);color:var(--tealtext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>Dashboard — Step 6</strong> — Leadership-ready reporting. All metrics update automatically from Campaign Tracker and REI Scoring.
+      <div class="help-detail">
+        <div class="help-io">
+          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Input (auto)</div>Campaign Tracker statuses · REI segment counts · Supplier data</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--tealtext)">Output</div>Response rate by region and tier · Segment portfolio · Before vs after metrics · Gap analysis</div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">Dashboard</div><div class="page-sub">Leadership reporting — share this view monthly</div></div></div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total suppliers</div><div class="metric-value" id="d-total">15</div><div class="metric-sub">in master list</div></div>
+    <div class="metric"><div class="metric-label">Response rate</div><div class="metric-value g" id="d-rate">67%</div><div class="metric-sub">vs 85% target</div></div>
+    <div class="metric"><div class="metric-label">Responded</div><div class="metric-value g" id="d-resp">10</div><div class="metric-sub">this campaign</div></div>
+    <div class="metric"><div class="metric-label">Escalated</div><div class="metric-value r" id="d-esc">2</div><div class="metric-sub">open actions</div></div>
+    <div class="metric"><div class="metric-label">Data complete</div><div class="metric-value t" id="d-data">87%</div><div class="metric-sub">contact records</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><div class="card-title">Response rate by region</div><div class="chart-wrap"><canvas id="dashRegionChart"></canvas></div></div>
+    <div class="card"><div class="card-title">Response rate by tier</div><div class="chart-wrap"><canvas id="dashTierChart"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Before vs after — what this program eliminates</div>
+    <table>
+      <thead><tr><th>Activity</th><th>Before</th><th>After</th><th>Saved</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Outreach</strong></td><td style="color:var(--redtext);font-size:11px">5 teams emailing independently, no tracking</td><td style="color:var(--greentext);font-size:11px">Single structured campaign with auto-reminders</td><td><span class="badge bg">80% effort reduction</span></td></tr>
+        <tr><td><strong>Response tracking</strong></td><td style="color:var(--redtext);font-size:11px">Manual spreadsheet checks, unknown status</td><td style="color:var(--greentext);font-size:11px">Auto-calculated live in Campaign Tracker</td><td><span class="badge bg">4-6 hrs/week</span></td></tr>
+        <tr><td><strong>Escalations</strong></td><td style="color:var(--redtext);font-size:11px">No system, escalations missed constantly</td><td style="color:var(--greentext);font-size:11px">REI auto-flag per segment, full audit trail</td><td><span class="badge bg">Zero missed</span></td></tr>
+        <tr><td><strong>Contact data</strong></td><td style="color:var(--redtext);font-size:11px">Scattered inboxes, 15% annual decay</td><td style="color:var(--greentext);font-size:11px">Verified master list, 5-step governance</td><td><span class="badge bg">90% bounce reduction</span></td></tr>
+        <tr><td><strong>Leadership report</strong></td><td style="color:var(--redtext);font-size:11px">Manual compilation, 3-4 hours each time</td><td style="color:var(--greentext);font-size:11px">One-click dashboard, auto-updated monthly</td><td><span class="badge bg">3-4 hrs/month</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     INTELLIGENCE: TREND ANALYSIS
+════════════════════════════════════════════════ -->
 <div id="page-trend" class="page">
   <div class="help-bar" style="background:var(--bluebg);color:var(--bluetext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Trend Analysis tab</strong> — Quarter-over-quarter performance tracking. Identifies which regions consistently underperform and which campaign types drive highest engagement.
+    <div style="flex:1"><strong>Trend Analysis</strong> — Quarter-over-quarter performance tracking. Identifies which regions consistently underperform and which campaign types drive highest engagement.
       <div class="help-detail">
         <div class="help-io">
           <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Input</div>Historical response rates per region and campaign type — updated quarterly after each campaign closes</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Output</div>Trend lines by region · Trend lines by campaign type · Emerging pattern analysis · Recommended actions per pattern</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--bluetext)">Output</div>Trend lines · Emerging patterns · Recommended actions per pattern identified</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
-  <div class="page-hdr"><div><div class="page-title">Trend analysis</div><div class="page-sub">Q3 2025 to Q2 2026 — 4 quarters of data</div></div></div>
+  <div class="page-hdr"><div><div class="page-title">Trend Analysis</div><div class="page-sub">Q3 2025 to Q2 2026 — 4 quarters of program data</div></div></div>
   <div class="grid2">
-    <div class="card"><div class="card-title">Response rate by region — quarterly trend</div><div class="chart-wrap"><canvas id="trendRegion" role="img" aria-label="Line chart showing response rate trends by region">Regional trends.</canvas></div></div>
-    <div class="card"><div class="card-title">Response rate by campaign type — quarterly trend</div><div class="chart-wrap"><canvas id="trendCamp" role="img" aria-label="Line chart showing response rate trends by campaign type">Campaign type trends.</canvas></div></div>
+    <div class="card"><div class="card-title">Response rate by region — quarterly</div><div class="chart-wrap"><canvas id="trendRegion"></canvas></div></div>
+    <div class="card"><div class="card-title">Response rate by campaign type — quarterly</div><div class="chart-wrap"><canvas id="trendCamp"></canvas></div></div>
   </div>
   <div class="card">
     <div class="card-title">Emerging patterns and recommended actions</div>
-    <div class="irow"><div class="adot" style="background:var(--amber)"></div><div><div style="font-size:13px;font-weight:500">Asia Pacific consistently 10-15% below global average across all campaigns</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Language and time zone barriers. Recommend localized outreach templates and regional follow-up cadence for Asia Pacific and India suppliers.</div></div></div>
-    <div class="irow"><div class="adot" style="background:var(--green)"></div><div><div style="font-size:13px;font-weight:500">Corrective action campaigns have highest response rate (93%) — highest accountability</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Supplier accountability highest when personal consequence is clear. Apply same urgency framing to compliance campaigns for Watch List suppliers.</div></div></div>
-    <div class="irow"><div class="adot" style="background:var(--blue)"></div><div><div style="font-size:13px;font-weight:500">Q1 response rates consistently highest across all regions and campaign types</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Suppliers more responsive at fiscal year start. Schedule critical compliance campaigns in Q1 for best results.</div></div></div>
-    <div class="irow"><div class="adot" style="background:var(--red)"></div><div><div style="font-size:13px;font-weight:500">Watch List suppliers show 0% response without category manager involvement from Stage 1</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Program Manager outreach alone insufficient for Watch List. Co-own from day one with category manager.</div></div></div>
+    <div class="irow"><div class="adot" style="background:var(--amber)"></div><div><div style="font-size:13px;font-weight:500">Asia Pacific consistently 10-15% below global average across all campaign types</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Language and time zone barriers. Recommend localized outreach templates and regional follow-up agent for Asia Pacific suppliers.</div></div></div>
+    <div class="irow"><div class="adot" style="background:var(--green)"></div><div><div style="font-size:13px;font-weight:500">Corrective action campaigns have highest response rate (93%) — highest supplier accountability</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Urgency framing works. Apply same tone to compliance campaigns for Watch List and P1 suppliers.</div></div></div>
+    <div class="irow"><div class="adot" style="background:var(--blue)"></div><div><div style="font-size:13px;font-weight:500">Q1 response rates consistently highest across all regions and campaign types</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Suppliers more responsive at fiscal year start. Schedule critical compliance campaigns in Q1 for best results.</div></div></div>
+    <div class="irow"><div class="adot" style="background:var(--red)"></div><div><div style="font-size:13px;font-weight:500">Watch List suppliers show 0% response without category manager involvement from Stage 1</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Program Manager outreach alone insufficient for Watch List. Co-own from day one with category manager.</div></div></div>
+    <div class="irow" style="border-bottom:none"><div class="adot" style="background:var(--amber)"></div><div><div style="font-size:13px;font-weight:500">Contact data decay approximately 15% per year — India and Asia Pacific highest churn</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Semi-annual verification not sufficient for high-churn regions. Recommend quarterly verification for India and Asia Pacific.</div></div></div>
   </div>
 </div>
 
-<!-- COMPLIANCE -->
+<!-- ═══════════════════════════════════════════════
+     INTELLIGENCE: COMPLIANCE
+════════════════════════════════════════════════ -->
 <div id="page-compliance" class="page">
   <div class="help-bar" style="background:var(--greenbg);color:var(--greentext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Compliance tab</strong> — Trade compliance campaign tracking. CO2 emissions, CBAM, conflict minerals, RoHS/REACH. Covers the regulatory compliance pillar of the program.
+    <div style="flex:1"><strong>Compliance</strong> — Trade compliance campaign tracking. CO2 emissions, CBAM, conflict minerals, RoHS/REACH.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Input (from suppliers)</div>CO2 emissions data per part · CBAM certificates · CMRT conflict minerals forms · Substance compliance declarations</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Output</div>Compliance dashboard submitted to regulators · Carbon liability calculation for finance · Risk flags for non-compliant suppliers</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Input (from suppliers)</div>CO2 data per part · CBAM certificates · CMRT forms · Substance declarations</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Output</div>Compliance dashboard for regulators · Carbon liability for finance · Risk flags for non-compliant suppliers</div>
         </div>
-        <div style="margin-top:8px;font-size:11px">Real experience: Built CBAM compliance tool for Nexteer Automotive — 800+ suppliers, 7 countries, 80% effort reduction (Kearney consulting project).</div>
+        <div style="margin-top:8px;font-size:11px;background:var(--bg2);padding:7px 10px;border-radius:5px"><strong>Real experience:</strong> Built CBAM compliance tool for Nexteer Automotive — 800+ suppliers, 7 countries, 80% effort reduction (Kearney consulting project, 2025).</div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
-  <div class="page-hdr"><div><div class="page-title">Compliance campaigns</div><div class="page-sub">Trade compliance data collection — regulatory obligations tracking</div></div></div>
-  <div class="grid2">
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">CO2 Emissions Collection</div><div style="font-size:11px;color:var(--text2)">Quarterly · All active suppliers · Due Jun 30</div></div>
-        <span class="badge ba">In progress</span>
-      </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Collect CO2 emissions data per part number for Scope 3 regulatory reporting</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:78%;background:var(--green)"></div></div>
-      <div style="font-size:11px;color:var(--text2)">78% submitted · 22% pending · 8 escalated</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
-        <div><div style="font-size:15px;font-weight:500;color:var(--green)">661</div><div style="font-size:10px;color:var(--text2)">Submitted</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">186</div><div style="font-size:10px;color:var(--text2)">Pending</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--red)">8</div><div style="font-size:10px;color:var(--text2)">Escalated</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">CBAM Certificate Collection</div><div style="font-size:11px;color:var(--text2)">Quarterly · EU-bound suppliers · Due Jun 30</div></div>
-        <span class="badge ba">In progress</span>
-      </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Collect CBAM certificates for all steel and aluminum imports to EU facilities</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:82%;background:var(--green)"></div></div>
-      <div style="font-size:11px;color:var(--text2)">82% submitted · 18% pending · Due Jun 30</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
-        <div><div style="font-size:15px;font-weight:500;color:var(--green)">312</div><div style="font-size:10px;color:var(--text2)">Submitted</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">68</div><div style="font-size:10px;color:var(--text2)">Pending</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--red)">3</div><div style="font-size:10px;color:var(--text2)">Escalated</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">Conflict Minerals (CMRT)</div><div style="font-size:11px;color:var(--text2)">Annual Q1 · All Tier 1 and Tier 2</div></div>
-        <span class="badge bg">Completed</span>
-      </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Dodd-Frank Section 1502 — tantalum, tin, tungsten, gold reporting</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:94%;background:var(--green)"></div></div>
-      <div style="font-size:11px;color:var(--text2)">94% submitted · Closed Q1 2026</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
-        <div><div style="font-size:15px;font-weight:500;color:var(--green)">452</div><div style="font-size:10px;color:var(--text2)">Submitted</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">29</div><div style="font-size:10px;color:var(--text2)">Pending</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--green)">94%</div><div style="font-size:10px;color:var(--text2)">Rate</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">Substance Compliance RoHS/REACH</div><div style="font-size:11px;color:var(--text2)">Annual Q2 · Regulated material suppliers</div></div>
-        <span class="badge bb">Scheduled</span>
-      </div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">EU RoHS and REACH substance declarations for regulated components</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:5%;background:var(--blue)"></div></div>
-      <div style="font-size:11px;color:var(--text2)">Launching Jul 1 · 380 suppliers targeted</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
-        <div><div style="font-size:15px;font-weight:500">380</div><div style="font-size:10px;color:var(--text2)">Targeted</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">0</div><div style="font-size:10px;color:var(--text2)">Submitted</div></div>
-        <div><div style="font-size:15px;font-weight:500">61d</div><div style="font-size:10px;color:var(--text2)">Until launch</div></div>
-      </div>
-    </div>
-  </div>
+  <div class="page-hdr"><div><div class="page-title">Compliance Campaigns</div><div class="page-sub">Trade compliance data collection — regulatory obligations tracking</div></div></div>
+  <div class="grid2" id="compliance-cards"></div>
   <div class="card">
-    <div class="card-title">CBAM project — Kearney consulting, Nexteer Automotive</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px">
-      <div style="background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">800+</div><div style="font-size:11px;color:var(--text2)">suppliers covered</div></div>
-      <div style="background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">7</div><div style="font-size:11px;color:var(--text2)">countries</div></div>
-      <div style="background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">80%</div><div style="font-size:11px;color:var(--text2)">effort reduction</div></div>
-      <div style="background:var(--bg2);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">4</div><div style="font-size:11px;color:var(--text2)">modules built</div></div>
+    <div class="card-title">CBAM project — Kearney consulting, Nexteer Automotive (2025)</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px">
+      <div style="background:var(--bg2);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">800+</div><div style="font-size:10px;color:var(--text2)">suppliers</div></div>
+      <div style="background:var(--bg2);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">7</div><div style="font-size:10px;color:var(--text2)">countries</div></div>
+      <div style="background:var(--bg2);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">80%</div><div style="font-size:10px;color:var(--text2)">effort reduction</div></div>
+      <div style="background:var(--bg2);border-radius:var(--r);padding:10px;text-align:center"><div style="font-size:20px;font-weight:500;color:var(--teal)">4</div><div style="font-size:10px;color:var(--text2)">modules built</div></div>
     </div>
-    <p style="font-size:12px;color:var(--text2);line-height:1.7">Built a semi-automated CBAM compliance tool for Nexteer Automotive covering 800+ suppliers across 7 countries. Automated CN code mapping, supplier CO2 data collection, weight validation across purchasing, supplier, and logistics, and CBAM tax calculation. Delivered a Power BI dashboard enabling supplier carbon footprint comparison, CBAM cost forecasting by quarter, and sourcing scenario analysis by region.</p>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7">Built a semi-automated CBAM compliance tool for Nexteer Automotive covering 800+ suppliers across 7 countries. Automated CN code mapping, supplier CO2 data collection, weight validation, and CBAM tax calculation. Delivered a Power BI dashboard enabling supplier carbon footprint comparison, CBAM cost forecasting by quarter, and sourcing scenario analysis linking supplier location to regulatory cost exposure.</p>
   </div>
 </div>
 
-<!-- IMPORT -->
-<div id="page-import" class="page">
-  <div class="help-bar" style="background:var(--amberbg);color:var(--ambertext)" onclick="toggleHelp(this)">
+<!-- ═══════════════════════════════════════════════
+     GOVERNANCE: CONTACT GOVERNANCE
+════════════════════════════════════════════════ -->
+<div id="page-contact_gov" class="page">
+  <div class="help-bar" style="background:var(--purpbg);color:var(--purptext)" onclick="toggleHelp(this)">
     <i class="ti ti-info-circle"></i>
-    <div style="flex:1">
-      <strong>Import tab</strong> — Bulk import suppliers via CSV. REI scores calculate automatically on import.
+    <div style="flex:1"><strong>Contact Governance</strong> — Defines how supplier contact data is maintained, validated, and kept accurate over time. Contact data decays at 15% per year without a structured process.
       <div class="help-detail">
         <div class="help-io">
-          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">CSV columns required</div>Name · Region · Tier · TTR · TTS · Single Source (Yes/No) · Spend ($K) · Financial Risk (Yes/No) · Performance (1-5) · Contact Name · Contact Email · Portal Status</div>
-          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Output</div>All suppliers imported with REI scores auto-calculated · Segments assigned · Master list and REI tab populated · Dashboard updates live</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--purptext)">The 5 triggers</div>New supplier onboarding · Semi-annual verification campaign · Email bounce detection · Personnel change notification · Annual full audit</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--purptext)">Output</div>Verified contact DB · Last verified date per supplier · Next review date · Bouncing email flags · Portal registration status</div>
         </div>
       </div>
     </div>
-    <i class="ti ti-chevron-down" style="font-size:14px;flex-shrink:0"></i>
+    <i class="ti ti-chevron-down"></i>
   </div>
-  <div class="page-hdr"><div><div class="page-title">Import data</div><div class="page-sub">Upload a CSV to bulk import suppliers with REI scoring</div></div></div>
+  <div class="page-hdr"><div><div class="page-title">Contact Governance</div><div class="page-sub">5-step process to maintain contact data accuracy across the global supply base</div></div></div>
+  <div class="card" id="gov-steps"></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:1rem 1.25rem;border-bottom:0.5px solid var(--border)"><div class="card-title" style="margin:0">Contact health tracker — current status</div></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Supplier</th><th>Segment</th><th>Last Verified</th><th>Next Review</th><th>Email Status</th><th>Portal</th><th>Action Required</th></tr></thead><tbody id="gov-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     GOVERNANCE: INTERNAL STAKEHOLDER COMMS
+════════════════════════════════════════════════ -->
+<div id="page-stakeholder" class="page">
+  <div class="help-bar" style="background:var(--greenbg);color:var(--greentext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>Internal Stakeholder Comms</strong> — Defines the Program Manager's engagement cadence with every internal team. Cross-functional alignment is a core JD requirement.
+      <div class="help-detail">
+        <div class="help-io">
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Meeting cadence</div>Weekly with category managers · Monthly with leadership · Pre-campaign with compliance · Bi-weekly with quality · Monthly with IT · Quarterly with finance</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--greentext)">Information flow</div>Each team provides specific inputs to the PM that feed into REI scoring, campaign design, escalation decisions, and compliance tracking</div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">Internal Stakeholder Communications</div><div class="page-sub">Meeting cadence and information flow across all internal teams</div></div></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:1rem 1.25rem;border-bottom:0.5px solid var(--border)"><div class="card-title" style="margin:0">Engagement cadence — who meets when and what the PM delivers</div></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Stakeholder</th><th>Meeting type</th><th>Frequency</th><th>Purpose</th><th>PM delivers</th><th>Status</th></tr></thead><tbody id="stakeholder-tbody"></tbody></table></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;margin-top:0">
+    <div style="padding:1rem 1.25rem;border-bottom:0.5px solid var(--border)"><div class="card-title" style="margin:0">Information flow — what each team provides to the Program Manager</div></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Team</th><th>What they provide</th><th>When</th><th>Used for</th></tr></thead><tbody id="infoflow-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SETUP: IMPORT DATA
+════════════════════════════════════════════════ -->
+<div id="page-import" class="page">
+  <div class="help-bar" style="background:var(--amberbg);color:var(--ambertext)" onclick="toggleHelp(this)">
+    <i class="ti ti-info-circle"></i>
+    <div style="flex:1"><strong>Import Data</strong> — Bulk import suppliers via CSV. REI scores calculate automatically on import.
+      <div class="help-detail">
+        <div class="help-io">
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">CSV columns</div>Name · Region · Tier · TTR · TTS · Single Source · Spend ($K) · Financial Risk · Performance (1-5) · Contact Name · Contact Email · Portal Status</div>
+          <div class="help-col"><div class="help-col-title" style="color:var(--ambertext)">Output</div>All suppliers imported with REI scores and segments auto-calculated · Master list populated · Dashboard updates live</div>
+        </div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-down"></i>
+  </div>
+  <div class="page-hdr"><div><div class="page-title">Import Data</div><div class="page-sub">Upload a CSV to bulk import suppliers with automatic REI scoring</div></div></div>
   <div class="card">
     <div class="card-title">Upload supplier CSV</div>
     <div class="upload-zone" onclick="document.getElementById('csv-inp').click()">
@@ -458,67 +608,59 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     <div id="import-result" style="margin-top:1rem"></div>
   </div>
   <div class="card">
-    <div class="card-title">Download sample CSV</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Download the 15-supplier template pre-filled with the demo data. Edit with your own suppliers then upload.</p>
+    <div class="card-title">Download sample CSV template</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Pre-filled with 15 demo suppliers. Replace with your own data and upload.</p>
     <button class="btn" onclick="downloadSample()"><i class="ti ti-download"></i> Download sample CSV</button>
   </div>
 </div>
 
-<!-- HOW IT WORKS -->
+<!-- ═══════════════════════════════════════════════
+     SETUP: HOW IT WORKS
+════════════════════════════════════════════════ -->
 <div id="page-guide" class="page">
-  <div class="page-hdr"><div><div class="page-title">How it works</div><div class="page-sub">Complete program guide — REI method, campaign types, process flow, RACI, before vs after</div></div></div>
+  <div class="page-hdr"><div><div class="page-title">How It Works</div><div class="page-sub">Complete program guide — REI method, campaign types, process flow, RACI, before vs after</div></div></div>
   <div class="welcome-hero">
-    <h2>Supplier Communications & Intelligence Program</h2>
-    <p>A structured framework for driving supplier accountability, data integrity, and scalable communication across a global supply base. Built on the Simchi-Levi Risk Exposure Index for supplier prioritization.</p>
+    <div style="font-size:20px;font-weight:500;margin-bottom:6px">Supplier Communications & Intelligence Program</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:1rem">A complete operational framework for managing global supplier outreach at scale. Built on the Simchi-Levi Risk Exposure Index for supplier prioritization.</div>
     <div class="tab-grid">
-      <div class="tab-card" onclick="showPage('rei',document.querySelector('.nav-item:nth-child(3)'))"><div class="tab-card-icon"><i class="ti ti-chart-radar" style="color:#5DCAA5"></i></div><div class="tab-card-title">Step 1: REI Scoring</div><div class="tab-card-desc">Score every supplier before launching campaigns</div></div>
-      <div class="tab-card" onclick="showPage('suppliers',document.querySelector('.nav-item:nth-child(4)'))"><div class="tab-card-icon"><i class="ti ti-building-factory" style="color:#5DCAA5"></i></div><div class="tab-card-title">Step 2: Supplier Master</div><div class="tab-card-desc">Contact database — segment from REI</div></div>
-      <div class="tab-card" onclick="showPage('tracker',document.querySelector('.nav-item:nth-child(5)'))"><div class="tab-card-icon"><i class="ti ti-speakerphone" style="color:#5DCAA5"></i></div><div class="tab-card-title">Step 4: Campaign Tracker</div><div class="tab-card-desc">Daily ops — update STATUS only</div></div>
-      <div class="tab-card" onclick="showPage('overview',document.querySelector('.nav-item:nth-child(2)'))"><div class="tab-card-icon"><i class="ti ti-layout-dashboard" style="color:#5DCAA5"></i></div><div class="tab-card-title">Step 6: Dashboard</div><div class="tab-card-desc">Leadership reporting — all auto-updated</div></div>
+      <div class="tab-card" onclick="showPage('rei',document.querySelectorAll('.nav-item')[4])"><i class="ti ti-chart-radar" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 1: REI Scoring</div><div class="tab-card-desc">Score every supplier first</div></div>
+      <div class="tab-card" onclick="showPage('suppliers',document.querySelectorAll('.nav-item')[5])"><i class="ti ti-building-factory" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 2: Supplier Master</div><div class="tab-card-desc">Contact DB from REI data</div></div>
+      <div class="tab-card" onclick="showPage('calendar',document.querySelectorAll('.nav-item')[1])"><i class="ti ti-calendar" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 3: Campaign Plan</div><div class="tab-card-desc">Annual calendar and timeline</div></div>
+      <div class="tab-card" onclick="showPage('tracker',document.querySelectorAll('.nav-item')[6])"><i class="ti ti-speakerphone" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 4: Track Daily</div><div class="tab-card-desc">Update STATUS only</div></div>
+      <div class="tab-card" onclick="showPage('escalation',document.querySelectorAll('.nav-item')[7])"><i class="ti ti-alert-triangle" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 5: Escalate</div><div class="tab-card-desc">Auto-populated action list</div></div>
+      <div class="tab-card" onclick="showPage('dashboard',document.querySelectorAll('.nav-item')[8])"><i class="ti ti-chart-bar" style="color:#5DCAA5;font-size:18px"></i><div class="tab-card-title">Step 6: Report</div><div class="tab-card-desc">Leadership dashboard</div></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-title">The REI method — Simchi-Levi Risk Exposure Index</div>
+    <div class="card-title">REI method — Simchi-Levi Risk Exposure Index</div>
     <div style="background:var(--bluebg);color:var(--bluetext);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:12px"><strong>REI = TTR minus TTS</strong> · Positive REI = supplier takes longer to recover than you can survive without them = critical risk</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
-      <div style="background:var(--redbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--redtext)">Critical P1</div><div style="font-size:11px;color:var(--redtext);margin-top:3px">Single source or high REI. Escalate after 7 days.</div></div>
-      <div style="background:var(--amberbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--ambertext)">Strategic P2</div><div style="font-size:11px;color:var(--ambertext);margin-top:3px">Spend above $2M. Escalate after 14 days.</div></div>
-      <div style="background:var(--bluebg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--bluetext)">Preferred P3</div><div style="font-size:11px;color:var(--bluetext);margin-top:3px">Spend above $500K. Escalate after 21 days.</div></div>
-      <div style="background:var(--greenbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--greentext)">Approved P4</div><div style="font-size:11px;color:var(--greentext);margin-top:3px">Lower spend. Escalate after 30 days.</div></div>
-      <div style="background:var(--purpbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--purptext)">Watch List</div><div style="font-size:11px;color:var(--purptext);margin-top:3px">Financial risk or failures. Escalate immediately.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+      <div style="background:var(--redbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:600;color:var(--redtext)">Critical P1</div><div style="font-size:10px;color:var(--redtext);margin-top:3px">Single source or high REI. Escalate after 7 days.</div></div>
+      <div style="background:var(--amberbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:600;color:var(--ambertext)">Strategic P2</div><div style="font-size:10px;color:var(--ambertext);margin-top:3px">Spend above $2M. Escalate after 14 days.</div></div>
+      <div style="background:var(--bluebg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:600;color:var(--bluetext)">Preferred P3</div><div style="font-size:10px;color:var(--bluetext);margin-top:3px">Spend above $500K. Escalate after 21 days.</div></div>
+      <div style="background:var(--greenbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:600;color:var(--greentext)">Approved P4</div><div style="font-size:10px;color:var(--greentext);margin-top:3px">Lower spend. Escalate after 30 days.</div></div>
+      <div style="background:var(--purpbg);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:600;color:var(--purptext)">Watch List</div><div style="font-size:10px;color:var(--purptext);margin-top:3px">Financial risk or failures. Escalate immediately.</div></div>
     </div>
   </div>
   <div class="card">
     <div class="card-title">The four campaign types</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:500;color:var(--bluetext);margin-bottom:4px">Regulatory Compliance</div><div style="font-size:11px;color:var(--text2)">Quarterly and annual. All active suppliers. CO2, CBAM, conflict minerals, RoHS/REACH. Output: Compliance dashboard submitted to regulators.</div></div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:500;color:var(--greentext);margin-bottom:4px">Risk and Financial Health</div><div style="font-size:11px;color:var(--text2)">Annual. P1 and P2 suppliers. REI inputs, financial health, business continuity. Output: Risk register updated, REI scores refreshed.</div></div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:500;color:var(--ambertext);margin-bottom:4px">Performance and Corrective Action</div><div style="font-size:11px;color:var(--text2)">Event-triggered. Root cause analysis, corrective action plans. Output: CAP accepted or supplier escalated to Watch List.</div></div>
-      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:500;color:var(--purptext);margin-bottom:4px">Contact and Master Data</div><div style="font-size:11px;color:var(--text2)">Semi-annual. Full supply base. Contact verification, portal registration, code of conduct. Output: Database verified, bounces resolved in 48 hours.</div></div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:600;color:var(--bluetext);margin-bottom:5px">Regulatory Compliance</div><div style="font-size:11px;color:var(--text2)">Quarterly and annual. All active suppliers. CO2, CBAM, conflict minerals, RoHS/REACH. Output: Compliance dashboard submitted to regulators.</div></div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:600;color:var(--greentext);margin-bottom:5px">Risk and Financial Health</div><div style="font-size:11px;color:var(--text2)">Annual. P1 and P2 suppliers. REI inputs, financial health, business continuity. Output: Risk register updated, REI scores refreshed.</div></div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:600;color:var(--ambertext);margin-bottom:5px">Performance and Corrective Action</div><div style="font-size:11px;color:var(--text2)">Event-triggered. Root cause analysis, corrective action plans. Output: CAP accepted or supplier escalated to Watch List.</div></div>
+      <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:12px"><div style="font-size:12px;font-weight:600;color:var(--purptext);margin-bottom:5px">Contact and Master Data</div><div style="font-size:11px;color:var(--text2)">Semi-annual. Full supply base. Contact verification, portal registration, code of conduct. Output: Database verified, bounces resolved in 48 hours.</div></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-title">Process flow — who does what, by when</div>
+    <div class="card-title">Six-step process flow — who does what, by when</div>
     <div class="step-flow">
-      <div class="step-card"><div class="step-num" style="background:var(--bluebg);color:var(--bluetext)">1</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Design</div><div style="font-size:10px;color:var(--text2)">Program Mgr + Compliance + Sourcing · Week 1</div></div>
+      <div class="step-card"><div class="step-num" style="background:var(--bluebg);color:var(--bluetext)">1</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Design</div><div style="font-size:10px;color:var(--text2)">PM + Compliance + Sourcing · Week 1</div></div>
       <div class="step-card"><div class="step-num" style="background:var(--greenbg);color:var(--greentext)">2</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Launch</div><div style="font-size:10px;color:var(--text2)">Program Manager · Week 2</div></div>
-      <div class="step-card"><div class="step-num" style="background:var(--amberbg);color:var(--ambertext)">3</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Track</div><div style="font-size:10px;color:var(--text2)">Program Manager daily · Weeks 2-4</div></div>
-      <div class="step-card"><div class="step-num" style="background:var(--redbg);color:var(--redtext)">4</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Escalate</div><div style="font-size:10px;color:var(--text2)">PM notifies · Category Mgr acts</div></div>
-      <div class="step-card"><div class="step-num" style="background:var(--tealbg);color:var(--tealtext)">5</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Report</div><div style="font-size:10px;color:var(--text2)">Program Manager · Monthly</div></div>
+      <div class="step-card"><div class="step-num" style="background:var(--amberbg);color:var(--ambertext)">3</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Track</div><div style="font-size:10px;color:var(--text2)">PM daily · Weeks 2-4</div></div>
+      <div class="step-card"><div class="step-num" style="background:var(--redbg);color:var(--redtext)">4</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Escalate</div><div style="font-size:10px;color:var(--text2)">PM notifies · Cat Mgr acts</div></div>
+      <div class="step-card"><div class="step-num" style="background:var(--tealbg);color:var(--tealtext)">5</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Validate</div><div style="font-size:10px;color:var(--text2)">Compliance + Quality</div></div>
+      <div class="step-card"><div class="step-num" style="background:var(--purpbg);color:var(--purptext)">6</div><div style="font-size:11px;font-weight:500;margin-bottom:3px">Report</div><div style="font-size:10px;color:var(--text2)">PM monthly to Leadership</div></div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Before vs after — what this program eliminates</div>
-    <table>
-      <thead><tr><th>Activity</th><th>Before</th><th>After</th><th>Saved</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Outreach</strong></td><td style="color:var(--redtext);font-size:11px">5 teams emailing independently, no tracking</td><td style="color:var(--greentext);font-size:11px">Single structured campaign, auto-reminders</td><td><span class="badge bg">80% effort reduction</span></td></tr>
-        <tr><td><strong>Response tracking</strong></td><td style="color:var(--redtext);font-size:11px">Manual spreadsheet checks</td><td style="color:var(--greentext);font-size:11px">Auto-calculated live in tracker</td><td><span class="badge bg">4-6 hrs/week</span></td></tr>
-        <tr><td><strong>Escalations</strong></td><td style="color:var(--redtext);font-size:11px">No system, escalations missed</td><td style="color:var(--greentext);font-size:11px">REI auto-flag, full audit trail</td><td><span class="badge bg">Zero missed</span></td></tr>
-        <tr><td><strong>Contact data</strong></td><td style="color:var(--redtext);font-size:11px">Scattered, 15% annual decay</td><td style="color:var(--greentext);font-size:11px">Verified master list, 5-step governance</td><td><span class="badge bg">90% bounce reduction</span></td></tr>
-        <tr><td><strong>Leadership report</strong></td><td style="color:var(--redtext);font-size:11px">Manual, 3-4 hours each time</td><td style="color:var(--greentext);font-size:11px">One-click dashboard, auto-updated</td><td><span class="badge bg">3-4 hrs/month</span></td></tr>
-      </tbody>
-    </table>
   </div>
   <div class="card">
     <div class="card-title">About</div>
@@ -532,31 +674,25 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 
 <!-- WELCOME MODAL -->
 <div class="modal-bd open" id="modal-welcome">
-  <div class="modal" style="width:600px">
+  <div class="modal" style="width:580px">
     <div style="text-align:center;margin-bottom:1.25rem">
       <div style="width:48px;height:48px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><i class="ti ti-network" style="font-size:22px;color:#fff"></i></div>
       <div class="modal-title" style="margin-bottom:4px">Supplier Communications & Intelligence Program</div>
-      <div style="font-size:13px;color:var(--text2)">A complete operational framework for managing global supplier outreach at scale</div>
+      <div style="font-size:12px;color:var(--text2)">A complete Program Manager tool for global supplier outreach at scale</div>
     </div>
-    <div style="background:var(--bluebg);color:var(--bluetext);border-radius:var(--r);padding:12px 14px;font-size:12px;margin-bottom:1rem">
-      <strong>Built on the Simchi-Levi Risk Exposure Index (REI)</strong><br>
-      REI = Time to Recover (TTR) minus Time to Survive (TTS). Positive REI = critical risk. Every supplier is scored and segmented before any campaign launches.
+    <div style="background:var(--bluebg);color:var(--bluetext);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:1rem"><strong>Built on Simchi-Levi REI:</strong> REI = TTR minus TTS. Positive = critical risk. Every supplier scored and segmented before any campaign launches.</div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:8px">This tool covers:</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:1rem">
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-users" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">RACI Matrix</div><div style="font-size:10px;color:var(--text2)">Roles across all program activities</div></div></div>
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-timeline" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">Program Timeline</div><div style="font-size:10px;color:var(--text2)">Full-year Gantt view of campaigns</div></div></div>
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-chart-radar" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">REI Scoring</div><div style="font-size:10px;color:var(--text2)">Simchi-Levi supplier prioritization</div></div></div>
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-speakerphone" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">Campaign Management</div><div style="font-size:10px;color:var(--text2)">Track responses, auto-escalate</div></div></div>
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-address-book" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">Contact Governance</div><div style="font-size:10px;color:var(--text2)">5-step data accuracy process</div></div></div>
+      <div style="display:flex;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-shield-check" style="font-size:15px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:11px;font-weight:500">Trade Compliance</div><div style="font-size:10px;color:var(--text2)">CO2, CBAM, conflict minerals</div></div></div>
     </div>
-    <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:var(--text)">This tool demonstrates:</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.25rem">
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-chart-radar" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">REI Scoring</div><div style="font-size:11px;color:var(--text2)">Score suppliers on TTR, TTS, spend, and risk. Segment auto-assigns.</div></div></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-speakerphone" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">Campaign management</div><div style="font-size:11px;color:var(--text2)">Create campaigns, track responses, auto-escalate by REI window.</div></div></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-alert-triangle" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">Escalation tracking</div><div style="font-size:11px;color:var(--text2)">Non-responsive suppliers escalate automatically per REI segment.</div></div></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-layout-dashboard" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">Leadership dashboard</div><div style="font-size:11px;color:var(--text2)">Live response rates, gap analysis, trends — all auto-updated.</div></div></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-shield-check" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">Trade compliance</div><div style="font-size:11px;color:var(--text2)">CO2, CBAM, conflict minerals, RoHS/REACH campaign tracking.</div></div></div>
-      <div style="display:flex;align-items:flex-start;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--r)"><i class="ti ti-trending-up" style="font-size:16px;color:var(--teal);flex-shrink:0;margin-top:1px"></i><div><div style="font-size:12px;font-weight:500">Trend analysis</div><div style="font-size:11px;color:var(--text2)">Quarter-over-quarter trends and emerging pattern identification.</div></div></div>
-    </div>
-    <div style="background:var(--greenbg);color:var(--greentext);border-radius:var(--r);padding:10px 14px;font-size:12px;margin-bottom:1rem">
-      <strong>Demo mode:</strong> 15 suppliers are pre-loaded with REI scores. One active campaign is running with real response data. Go to Campaign Tracker and change any supplier STATUS to see the dashboard update live.
-    </div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:1rem;text-align:center">Each tab has a blue/teal help bar at the top — click it to see what inputs and outputs that section uses.</div>
+    <div style="background:var(--greenbg);color:var(--greentext);border-radius:var(--r);padding:9px 14px;font-size:11px;margin-bottom:1rem"><strong>Demo mode active:</strong> 15 suppliers pre-loaded with REI scores. One campaign running. Go to Campaign Tracker and change any supplier STATUS to see the dashboard update live. Each tab has a help bar — click it for inputs and outputs.</div>
     <div class="modal-footer" style="justify-content:center">
-      <button class="btn primary" onclick="document.getElementById('modal-welcome').style.display='none'" style="padding:8px 24px;font-size:13px"><i class="ti ti-arrow-right"></i> Start exploring the demo</button>
+      <button class="btn primary" onclick="document.getElementById('modal-welcome').style.display='none'" style="padding:8px 28px;font-size:13px"><i class="ti ti-arrow-right"></i> Start exploring</button>
     </div>
   </div>
 </div>
@@ -585,18 +721,18 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 <div class="modal-bd" id="modal-rei_supplier" onclick="if(event.target===this)closeModal('rei_supplier')">
   <div class="modal">
     <div class="modal-title">Add supplier — REI scoring</div>
-    <div style="background:var(--amberbg);color:var(--ambertext);border-radius:var(--r);padding:8px 12px;font-size:11px;margin-bottom:12px"><strong>TTR</strong> = weeks to find alternate source if supplier goes down. <strong>TTS</strong> = weeks production continues without supplier. REI = TTR minus TTS. Segment auto-assigns.</div>
+    <div style="background:var(--amberbg);color:var(--ambertext);border-radius:var(--r);padding:8px 12px;font-size:11px;margin-bottom:12px"><strong>TTR</strong> = weeks to find alternate source. <strong>TTS</strong> = weeks production continues. REI = TTR minus TTS. Segment auto-assigns.</div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">Supplier name *</label><input type="text" id="rs-name" placeholder="e.g. Magna International"></div>
+      <div class="form-group"><label class="form-label">Supplier name *</label><input type="text" id="rs-name"></div>
       <div class="form-group"><label class="form-label">Region *</label><select id="rs-region"><option>N. America</option><option>Europe</option><option>Asia Pacific</option><option>India</option><option>Mexico</option><option>Other</option></select></div>
     </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Tier</label><select id="rs-tier"><option>Tier 1</option><option>Tier 2</option><option>Tier 3</option></select></div>
-      <div class="form-group"><label class="form-label">Annual spend ($K) *</label><input type="number" id="rs-spend" placeholder="e.g. 4200" min="0"></div>
+      <div class="form-group"><label class="form-label">Annual spend ($K) *</label><input type="number" id="rs-spend" min="0"></div>
     </div>
     <div class="form-grid">
-      <div class="form-group"><label class="form-label">TTR — Time to Recover (weeks) *</label><input type="number" id="rs-ttr" placeholder="e.g. 12" min="0" max="52"></div>
-      <div class="form-group"><label class="form-label">TTS — Time to Survive (weeks) *</label><input type="number" id="rs-tts" placeholder="e.g. 2" min="0" max="52"></div>
+      <div class="form-group"><label class="form-label">TTR — Time to Recover (weeks)</label><input type="number" id="rs-ttr" min="0" max="52"></div>
+      <div class="form-group"><label class="form-label">TTS — Time to Survive (weeks)</label><input type="number" id="rs-tts" min="0" max="52"></div>
     </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Single source?</label><select id="rs-single"><option>No</option><option>Yes</option></select></div>
@@ -604,7 +740,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
     </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Performance (1-5, 5=best)</label><select id="rs-perf"><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3" selected>3 — Average</option><option value="2">2 — Poor</option><option value="1">1 — Critical</option></select></div>
-      <div class="form-group"><label class="form-label">Contact email</label><input type="email" id="rs-email" placeholder="contact@supplier.com"></div>
+      <div class="form-group"><label class="form-label">Contact email</label><input type="email" id="rs-email"></div>
     </div>
     <div class="form-grid">
       <div class="form-group"><label class="form-label">Contact name</label><input type="text" id="rs-contact"></div>
@@ -618,7 +754,10 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 </div>
 
 <script>
-const SEG = {
+// ═══════════════════════════════════════════════
+// CORE DATA
+// ═══════════════════════════════════════════════
+const SEG={
   'Critical / P1':{bg:'#FEF2F2',fg:'#991B1B',esc:'7 days'},
   'Strategic / P2':{bg:'#FFFBEB',fg:'#92400E',esc:'14 days'},
   'Preferred / P3':{bg:'#EFF6FF',fg:'#1E40AF',esc:'21 days'},
@@ -626,18 +765,15 @@ const SEG = {
   'Watch List':{bg:'#FDF4FF',fg:'#4C1D95',esc:'Immediate'},
 };
 
-function calcREI(s) {
-  const ttr=+s.ttr||0, tts=+s.tts||0, rei=ttr-tts;
-  const spend=+s.spend||0, single=s.single==='Yes', fin=s.fin==='Yes', perf=+s.perf||3;
+function calcREI(s){
+  const ttr=+s.ttr||0,tts=+s.tts||0,rei=ttr-tts;
+  const spend=+s.spend||0,single=s.single==='Yes',fin=s.fin==='Yes',perf=+s.perf||3;
   const comp=Math.round((Math.min(Math.max(rei,0),20)/20*35)+(single?25:0)+(Math.min(spend,10000)/10000*20)+(fin?10:0)+((6-Math.min(perf,5))/5*10));
-  const seg=fin?'Watch List':
-    (single||spend>=5000||rei>8)?'Critical / P1':
-    spend>=2000?'Strategic / P2':
-    spend>=500?'Preferred / P3':'Approved / P4';
-  return {rei,comp,seg,esc:SEG[seg].esc};
+  const seg=fin?'Watch List':(single||spend>=5000||rei>8)?'Critical / P1':spend>=2000?'Strategic / P2':spend>=500?'Preferred / P3':'Approved / P4';
+  return{rei,comp,seg,esc:SEG[seg].esc};
 }
 
-const DEMO = [
+const DEMO=[
   {name:'Bosch GmbH',region:'Europe',tier:'Tier 1',ttr:12,tts:2,single:'Yes',spend:8500,fin:'No',perf:5,contact:'Anna Muller',email:'a.muller@bosch.com',portal:'Registered',status:'Responded'},
   {name:'BorgWarner',region:'N. America',tier:'Tier 1',ttr:16,tts:2,single:'Yes',spend:6200,fin:'No',perf:5,contact:'Steve Hunt',email:'s.hunt@borgwarner.com',portal:'Registered',status:'Responded'},
   {name:'Gentex Corporation',region:'N. America',tier:'Tier 1',ttr:14,tts:2,single:'Yes',spend:4800,fin:'No',perf:5,contact:'Mike Johnson',email:'m.johnson@gentex.com',portal:'Registered',status:'Responded'},
@@ -655,9 +791,9 @@ const DEMO = [
   {name:'Zhejiang Components',region:'Asia Pacific',tier:'Tier 2',ttr:18,tts:1,single:'No',spend:280,fin:'Yes',perf:2,contact:'Chen Li',email:'c.li@zhejiang.com',portal:'Not Registered',status:'Escalated'},
 ];
 
-let suppliers = DEMO.map(s=>{const r=calcREI(s);return {...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei:r.rei,comp:r.comp,segment:r.seg,esc:r.esc};});
-let campaigns = [{id:1,name:'Q2 Compliance Data Collection — CO2 Emissions',type:'Regulatory Compliance',due:'2026-06-30',priority:'High',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',status:'active',created:'Jun 1, 2026'}];
-let activity = [
+let suppliers=DEMO.map(s=>{const r=calcREI(s);return{...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei:r.rei,comp:r.comp,segment:r.seg,esc:r.esc};});
+let campaigns=[{id:1,name:'Q2 Compliance Data Collection — CO2 Emissions',type:'Regulatory Compliance',due:'2026-06-30',priority:'High',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',status:'active',created:'Jun 1, 2026'}];
+let activity=[
   {msg:'Foshan Manufacturing escalated — no response in 42 days. Category manager notified.',color:'#E24B4A',time:'Jun 3, 2026 09:15'},
   {msg:'Zhejiang Components escalated — 2 reminders sent, no response.',color:'#E24B4A',time:'Jun 2, 2026 14:30'},
   {msg:'Q2 Compliance campaign launched — 15 suppliers targeted',color:'#378ADD',time:'Jun 1, 2026 08:00'},
@@ -665,138 +801,410 @@ let activity = [
   {msg:'REI scoring complete — 15 suppliers scored and segmented',color:'#0D9488',time:'May 28, 2026 10:00'},
 ];
 
-let rChart, sChart, reiCh, trendR, trendC;
-
-function updateAll() {
-  const total=suppliers.length, resp=suppliers.filter(s=>s.status==='Responded').length;
-  const pend=suppliers.filter(s=>s.status==='Pending').length, esc=suppliers.filter(s=>s.status==='Escalated').length;
-  const p1=suppliers.filter(s=>s.segment==='Critical / P1').length, wl=suppliers.filter(s=>s.segment==='Watch List').length;
-  const rate=total?Math.round(resp/total*100):0;
-  document.getElementById('m-total').textContent=total;
-  document.getElementById('m-rate').textContent=rate+'%';
-  document.getElementById('m-pending').textContent=pend;
-  document.getElementById('m-esc').textContent=esc;
-  document.getElementById('m-p1').textContent=p1;
-  document.getElementById('m-watch').textContent=wl;
-  document.getElementById('nb-rei').textContent=total;
-  document.getElementById('nb-sup').textContent=total;
-  document.getElementById('nb-esc').textContent=esc;
-  document.getElementById('topbar-sub').textContent=total+' suppliers · '+campaigns.length+' campaign'+(campaigns.length!==1?'s':'');
-  document.getElementById('esc-sub').textContent=esc+' suppliers requiring immediate action';
-  document.getElementById('sup-sub').textContent=total+' suppliers · '+suppliers.filter(s=>!s.email).length+' missing emails · Segment from REI scoring';
-
-  const segs=['Critical / P1','Strategic / P2','Preferred / P3','Approved / P4','Watch List'];
-  const ids=['tier-p1','tier-p2','tier-p3','tier-p4','tier-wl'];
-  const escs=['7 days','14 days','21 days','30 days','Immediate'];
-  const slabs=['Critical P1','Strategic P2','Preferred P3','Approved P4','Watch List'];
-  segs.forEach((seg,i)=>{
-    const c=suppliers.filter(s=>s.segment===seg).length;
-    document.getElementById(ids[i]).textContent=`${slabs[i]} — ${c} supplier${c!==1?'s':''} — ${escs[i]}`;
-  });
-
-  updateCharts();
-  updateGap();
+// ═══════════════════════════════════════════════
+// CHART INSTANCES
+// ═══════════════════════════════════════════════
+let charts={};
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function makeChart(id,cfg){
+  const el=document.getElementById(id);
+  if(!el)return;
+  destroyChart(id);
+  charts[id]=new Chart(el,cfg);
 }
 
-function updateCharts() {
+// ═══════════════════════════════════════════════
+// STATIC CONTENT BUILDERS
+// ═══════════════════════════════════════════════
+function buildCalendar(){
+  const types=[
+    {name:'Regulatory Compliance',color:'#1D4ED8',bg:'#EFF6FF',campaigns:[
+      {name:'CO2 Emissions Collection',owner:'Program Manager',target:'All active suppliers',freq:'Quarterly',quarters:'Q1,Q2,Q3,Q4',window:'4 weeks',esc:'14 days no response',output:'CO2 data submitted to compliance team'},
+      {name:'CBAM Certificate Collection',owner:'Program Manager',target:'EU-bound suppliers',freq:'Quarterly',quarters:'Q1,Q2,Q3,Q4',window:'3 weeks',esc:'10 days no response',output:'CBAM certificates filed'},
+      {name:'Conflict Minerals (CMRT)',owner:'Program Manager',target:'All Tier 1 and Tier 2',freq:'Annual',quarters:'Q1',window:'6 weeks',esc:'21 days no response',output:'CMRT filed with SEC'},
+      {name:'Substance Compliance (RoHS/REACH)',owner:'Program Manager',target:'Regulated material suppliers',freq:'Annual',quarters:'Q2',window:'6 weeks',esc:'21 days no response',output:'Material compliance DB updated'},
+    ]},
+    {name:'Risk and Financial Health',color:'#065F46',bg:'#F0FDF4',campaigns:[
+      {name:'Annual Supplier Risk Assessment',owner:'Program Manager',target:'All P1 and P2 suppliers',freq:'Annual',quarters:'Q3',window:'8 weeks',esc:'30 days no response',output:'Risk register updated, REI scores refreshed'},
+      {name:'Business Continuity Assessment',owner:'Program Manager',target:'P1 and single-source suppliers',freq:'Annual',quarters:'Q2',window:'6 weeks',esc:'21 days no response',output:'BCP status per supplier'},
+      {name:'Sub-tier Supplier Visibility',owner:'Program Manager',target:'Critical commodity Tier 1',freq:'Annual',quarters:'Q4',window:'6 weeks',esc:'21 days no response',output:'Sub-tier map updated'},
+    ]},
+    {name:'Performance and Corrective Action',color:'#B45309',bg:'#FFFBEB',campaigns:[
+      {name:'Corrective Action — Quality',owner:'Quality Eng + PM',target:'Suppliers with reject rate above 2%',freq:'Event-triggered',quarters:'As needed',window:'2 weeks',esc:'7 days no response',output:'CAP accepted or supplier on watch list'},
+      {name:'Corrective Action — Delivery',owner:'Sourcing + PM',target:'Suppliers with 2+ late deliveries',freq:'Event-triggered',quarters:'As needed',window:'2 weeks',esc:'7 days no response',output:'Delivery plan accepted or watch list'},
+    ]},
+    {name:'Contact and Master Data',color:'#7C3AED',bg:'#FDF4FF',campaigns:[
+      {name:'Contact Verification',owner:'Program Manager',target:'Full supply base',freq:'Semi-annual',quarters:'Q1,Q3',window:'4 weeks',esc:'14 days no response',output:'Contact DB verified, bounces resolved'},
+      {name:'Supplier Code of Conduct',owner:'Program Manager',target:'All active suppliers',freq:'Annual',quarters:'Q1',window:'6 weeks',esc:'21 days no response',output:'100% sign-off on file'},
+      {name:'Portal Registration',owner:'Program Manager',target:'New onboarding suppliers',freq:'As needed',quarters:'Ongoing',window:'2 weeks',esc:'7 days no response',output:'Supplier active in portal'},
+    ]},
+  ];
+  let html='';
+  types.forEach(t=>{
+    html+=`<div style="margin-bottom:1rem">
+      <div style="background:${t.color};color:#fff;padding:8px 12px;border-radius:8px 8px 0 0;font-size:11px;font-weight:600">${t.name}</div>
+      <div style="border:0.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;overflow:hidden">
+        <table style="margin:0">
+          <thead style="background:${t.bg}"><tr><th>Campaign</th><th>Owner</th><th>Target</th><th>Frequency</th><th>Quarter</th><th>Window</th><th>Escalation Trigger</th><th>Output</th></tr></thead>
+          <tbody>${t.campaigns.map(c=>`<tr>
+            <td><strong style="font-size:11px;color:${t.color}">${c.name}</strong></td>
+            <td style="font-size:11px">${c.owner}</td>
+            <td style="font-size:11px">${c.target}</td>
+            <td><span class="badge" style="background:${t.bg};color:${t.color};font-size:10px">${c.freq}</span></td>
+            <td style="font-size:11px;font-weight:500">${c.quarters}</td>
+            <td style="font-size:11px">${c.window}</td>
+            <td style="font-size:11px;color:#DC2626">${c.esc}</td>
+            <td style="font-size:11px;color:var(--text2)">${c.output}</td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+  document.getElementById('calendar-content').innerHTML=html;
+}
+
+function buildRaci(){
+  const rows=[
+    {act:'REI scoring and supplier segmentation',pm:'R',cm:'C',comp:'I',qual:'I',it:'C',fin:'I',lead:'I',sect:'Strategy'},
+    {act:'Campaign calendar design',pm:'R',cm:'C',comp:'C',qual:'C',it:'I',fin:'I',lead:'A',sect:'Strategy'},
+    {act:'Annual program plan sign-off',pm:'R',cm:'C',comp:'C',qual:'I',it:'I',fin:'I',lead:'A',sect:'Strategy'},
+    {act:'Launch outreach campaign',pm:'R',cm:'I',comp:'C',qual:'I',it:'C',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Track supplier responses daily',pm:'R',cm:'I',comp:'I',qual:'I',it:'C',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Send reminder to non-responders',pm:'R',cm:'I',comp:'I',qual:'I',it:'I',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Stage 1-2 escalation (14-day rule)',pm:'R',cm:'C',comp:'I',qual:'I',it:'I',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Stage 3+ escalation (direct contact)',pm:'C',cm:'R',comp:'I',qual:'I',it:'I',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Validate compliance data received',pm:'C',cm:'I',comp:'R',qual:'C',it:'I',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Validate corrective action plans',pm:'C',cm:'C',comp:'I',qual:'R',it:'I',fin:'I',lead:'I',sect:'Operations'},
+    {act:'Contact data governance process',pm:'R',cm:'I',comp:'I',qual:'I',it:'C',fin:'I',lead:'I',sect:'Governance'},
+    {act:'Portal registration management',pm:'R',cm:'I',comp:'I',qual:'I',it:'R',fin:'I',lead:'I',sect:'Governance'},
+    {act:'Supplier data completeness audit',pm:'R',cm:'C',comp:'C',qual:'I',it:'R',fin:'I',lead:'I',sect:'Governance'},
+    {act:'Monthly leadership dashboard',pm:'R',cm:'C',comp:'C',qual:'I',it:'C',fin:'I',lead:'A',sect:'Reporting'},
+    {act:'Trend analysis and insights',pm:'R',cm:'C',comp:'I',qual:'I',it:'I',fin:'I',lead:'I',sect:'Reporting'},
+    {act:'CBAM cost exposure brief to finance',pm:'R',cm:'I',comp:'R',qual:'I',it:'I',fin:'C',lead:'I',sect:'Reporting'},
+    {act:'Supplier risk register update',pm:'R',cm:'A',comp:'C',qual:'C',it:'I',fin:'I',lead:'I',sect:'Reporting'},
+  ];
+  const rClass={'R':'raci-r','A':'raci-a','C':'raci-c','I':'raci-i','-':'raci-empty'};
+  let currentSect='';
+  let html='';
+  rows.forEach(r=>{
+    if(r.sect!==currentSect){
+      currentSect=r.sect;
+      html+=`<tr><td colspan="8" style="background:var(--navy);color:#fff;font-size:10px;font-weight:600;padding:6px 10px;text-transform:uppercase;letter-spacing:.06em">${currentSect}</td></tr>`;
+    }
+    html+=`<tr>
+      <td style="font-size:12px">${r.act}</td>
+      ${[r.pm,r.cm,r.comp,r.qual,r.it,r.fin,r.lead].map(v=>`<td class="${rClass[v]||'raci-empty'}">${v}</td>`).join('')}
+    </tr>`;
+  });
+  document.getElementById('raci-tbody').innerHTML=html;
+}
+
+function buildTimeline(){
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const typeColors={
+    'Regulatory Compliance':'#1D4ED8',
+    'Risk and Financial Health':'#065F46',
+    'Performance and Corrective Action':'#B45309',
+    'Contact and Master Data':'#7C3AED',
+  };
+  const campaigns=[
+    {name:'CO2 Emissions',type:'Regulatory Compliance',months:[1,2,3,4,5,6,7,8,9,10,11,12],owner:'PM'},
+    {name:'CBAM Certificates',type:'Regulatory Compliance',months:[1,2,3,4,5,6,7,8,9,10,11,12],owner:'PM'},
+    {name:'Conflict Minerals',type:'Regulatory Compliance',months:[1,2,3],owner:'PM'},
+    {name:'RoHS/REACH',type:'Regulatory Compliance',months:[4,5,6,7],owner:'PM'},
+    {name:'Risk Assessment',type:'Risk and Financial Health',months:[7,8,9,10],owner:'PM'},
+    {name:'Business Continuity',type:'Risk and Financial Health',months:[4,5,6,7],owner:'PM'},
+    {name:'Sub-tier Visibility',type:'Risk and Financial Health',months:[10,11,12],owner:'PM'},
+    {name:'Corrective Action (Quality)',type:'Performance and Corrective Action',months:[1,2,3,4,5,6,7,8,9,10,11,12],owner:'QE + PM'},
+    {name:'Corrective Action (Delivery)',type:'Performance and Corrective Action',months:[1,2,3,4,5,6,7,8,9,10,11,12],owner:'Sourcing + PM'},
+    {name:'Contact Verification',type:'Contact and Master Data',months:[1,2,3,7,8,9],owner:'PM'},
+    {name:'Code of Conduct',type:'Contact and Master Data',months:[1,2,3],owner:'PM'},
+    {name:'Portal Registration',type:'Contact and Master Data',months:[1,2,3,4,5,6,7,8,9,10,11,12],owner:'PM'},
+  ];
+  const currentMonth=new Date().getMonth()+1;
+  let html=`<div style="display:grid;grid-template-columns:170px repeat(12,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;font-size:10px">`;
+  html+=`<div style="background:var(--navy);color:#fff;padding:7px 10px;font-weight:600;font-size:10px">Campaign</div>`;
+  months.forEach((m,i)=>{
+    const isNow=i+1===currentMonth;
+    html+=`<div style="background:${isNow?'#0D9488':'#1E3A5F'};color:#fff;padding:7px 4px;text-align:center;font-weight:${isNow?'700':'600'};font-size:9px">${m}${isNow?'*':''}</div>`;
+  });
+  campaigns.forEach(c=>{
+    const col=typeColors[c.type]||'#1E3A5F';
+    const lightCol=col+'22';
+    html+=`<div style="background:var(--bg);padding:6px 10px;display:flex;align-items:center;border-top:0.5px solid var(--border)"><div><div style="font-size:10px;font-weight:500;color:${col}">${c.name}</div><div style="font-size:9px;color:var(--text3)">${c.owner}</div></div></div>`;
+    for(let m=1;m<=12;m++){
+      const active=c.months.includes(m);
+      const isNow=m===currentMonth;
+      html+=`<div style="background:${isNow?'rgba(13,148,136,0.08)':'var(--bg)'};padding:3px;border-top:0.5px solid var(--border)">
+        ${active?`<div style="height:22px;background:${col};border-radius:3px;opacity:${isNow?1:0.75}"></div>`:`<div style="height:22px;background:${lightCol};border-radius:3px;opacity:0.3"></div>`}
+      </div>`;
+    }
+  });
+  html+='</div>';
+  html+=`<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:10px">`;
+  Object.entries(typeColors).forEach(([type,color])=>{
+    html+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px"><div style="width:12px;height:12px;background:${color};border-radius:2px"></div>${type}</div>`;
+  });
+  html+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px"><div style="width:12px;height:12px;background:#0D9488;border-radius:2px"></div>* = current month</div>`;
+  html+='</div>';
+  document.getElementById('timeline-content').innerHTML=html;
+}
+
+function buildContactGov(){
+  const steps=[
+    {num:'1',color:'#1D4ED8',title:'Initial Onboarding',trigger:'When supplier is added to master list',owner:'Program Manager',action:'Collect primary, backup, and escalation contacts. Verify email is valid. Register in portal.',timeline:'Day 0'},
+    {num:'2',color:'#0D9488',title:'Semi-Annual Verification',trigger:'Every 6 months — Q1 and Q3',owner:'Program Manager',action:'Send Contact Verification campaign to all active suppliers. Update master list within 1 week of close.',timeline:'Q1 and Q3'},
+    {num:'3',color:'#D97706',title:'Bounce Detection',trigger:'Any time outreach email bounces',owner:'Program Manager',action:'Flag supplier in master list. Attempt backup contact within 48 hours. Escalate to category manager if backup also fails.',timeline:'Within 48 hours'},
+    {num:'4',color:'#16A34A',title:'Personnel Change Alert',trigger:'When supplier notifies of contact change',owner:'Supplier notifies PM',action:'Update master list immediately. Send welcome outreach to new contact within 1 week.',timeline:'Within 1 week'},
+    {num:'5',color:'#7C3AED',title:'Annual Audit',trigger:'Every Q4',owner:'Program Manager and IT',action:'Full audit of supplier contact database. Cross-check against portal registrations. Report data completeness to leadership.',timeline:'Q4 annually'},
+  ];
+  document.getElementById('gov-steps').innerHTML='<div class="card-title">5-step contact data governance process</div>'+steps.map(s=>`
+    <div class="gov-step">
+      <div class="gov-num" style="background:${s.color}">${s.num}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+          <div style="font-size:13px;font-weight:500;color:${s.color}">${s.title}</div>
+          <span class="badge" style="background:${s.color}22;color:${s.color};font-size:10px">${s.timeline}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px"><strong>Trigger:</strong> ${s.trigger} &nbsp;·&nbsp; <strong>Owner:</strong> ${s.owner}</div>
+        <div style="font-size:12px;color:var(--text2)">${s.action}</div>
+      </div>
+    </div>`).join('');
+
+  const health=[
+    {name:'Bosch GmbH',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
+    {name:'BorgWarner',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
+    {name:'Gentex Corporation',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
+    {name:'Magna International',seg:'Strategic / P2',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
+    {name:'Aptiv PLC',seg:'Strategic / P2',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
+    {name:'Tata Steel',seg:'Preferred / P3',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
+    {name:'Minda Industries',seg:'Preferred / P3',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
+    {name:'Webasto',seg:'Approved / P4',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
+    {name:'Foshan Manufacturing',seg:'Watch List',last:'2025-03-01',next:'2026-03-01',email:'BOUNCING',portal:'Not Registered',action:'URGENT: find valid email via category manager'},
+    {name:'Zhejiang Components',seg:'Watch List',last:'2025-09-01',next:'2026-03-01',email:'Verified',portal:'Not Registered',action:'Complete portal registration'},
+  ];
+  document.getElementById('gov-tbody').innerHTML=health.map(h=>{
+    const{bg,fg}=SEG[h.seg]||{bg:'white',fg:'#333'};
+    const eBg=h.email==='BOUNCING'?'var(--redbg)':'var(--greenbg)';
+    const eFg=h.email==='BOUNCING'?'var(--redtext)':'var(--greentext)';
+    const aBg=h.action.includes('URGENT')?'var(--redbg)':h.action!=='None'?'var(--amberbg)':'var(--greenbg)';
+    const aFg=h.action.includes('URGENT')?'var(--redtext)':h.action!=='None'?'var(--ambertext)':'var(--greentext)';
+    return `<tr>
+      <td><strong style="font-size:12px">${h.name}</strong></td>
+      <td><span class="badge" style="background:${bg};color:${fg}">${h.seg}</span></td>
+      <td style="font-size:11px">${h.last}</td>
+      <td style="font-size:11px">${h.next}</td>
+      <td style="font-size:11px;background:${eBg};color:${eFg};font-weight:500">${h.email}</td>
+      <td style="font-size:11px">${h.portal}</td>
+      <td style="font-size:11px;background:${aBg};color:${aFg};font-weight:${h.action.includes('URGENT')?'700':'400'}">${h.action}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildStakeholder(){
+  const cadence=[
+    {who:'Global Operations Leadership',type:'Monthly Program Health Report',freq:'Monthly',purpose:'Report response rates, escalations, and program health vs targets',delivers:'Dashboard summary, gap analysis, recommended actions',status:'Active'},
+    {who:'Sourcing and Category Managers',type:'Weekly Escalation Review',freq:'Weekly',purpose:'Align on escalated suppliers requiring category manager intervention',delivers:'Escalation log with supplier names, days overdue, recommended actions',status:'Active'},
+    {who:'Compliance Team',type:'Pre-Campaign Alignment',freq:'Before each compliance campaign',purpose:'Confirm data requirements, regulatory deadlines, submission format',delivers:'Campaign brief with target suppliers, data template, submission timeline',status:'Active'},
+    {who:'Supplier Quality Engineering',type:'Corrective Action Review',freq:'Bi-weekly',purpose:'Review open corrective actions and agree on escalation decisions',delivers:'Open CAR status by supplier with days outstanding and next actions',status:'Active'},
+    {who:'IT and Data Team',type:'System and Data Review',freq:'Monthly',purpose:'Review portal registrations, contact data completeness, system issues',delivers:'Contact health report showing bouncing emails and incomplete profiles',status:'Active'},
+    {who:'Finance Team',type:'CBAM and Cost Impact Brief',freq:'Quarterly',purpose:'Share carbon cost exposure from CBAM compliance data collected',delivers:'CBAM cost liability estimate by supplier and region',status:'Active'},
+  ];
+  document.getElementById('stakeholder-tbody').innerHTML=cadence.map(c=>`<tr>
+    <td><strong style="font-size:12px;color:var(--navy)">${c.who}</strong></td>
+    <td style="font-size:11px;color:var(--teal);font-weight:500">${c.type}</td>
+    <td><span class="badge bt" style="font-size:10px">${c.freq}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${c.purpose}</td>
+    <td style="font-size:11px">${c.delivers}</td>
+    <td><span class="badge bg">${c.status}</span></td>
+  </tr>`).join('');
+
+  const flows=[
+    {team:'Sourcing Team',provides:'Supplier list with spend data and tier classification',when:'Annually and when new suppliers added',used:'REI scoring and segmentation'},
+    {team:'Compliance Team',provides:'Regulatory deadlines, data requirements, submission format',when:'Before each compliance campaign',used:'Campaign design and template creation'},
+    {team:'Finance Team',provides:'CBAM liability calculations and EU shipment volumes',when:'Quarterly',used:'Compliance campaign targeting and cost validation'},
+    {team:'Supplier Quality Eng',provides:'Quality rejection rates and delivery failure data',when:'Monthly',used:'Watch list updates and corrective action campaign triggers'},
+    {team:'IT Team',provides:'Portal registration status, bounce reports, system issues',when:'Monthly',used:'Contact health tracker and supplier master updates'},
+    {team:'Category Managers',provides:'Escalation resolution outcomes and supplier commitments',when:'After each escalation',used:'Escalation log closure and supplier status updates'},
+  ];
+  document.getElementById('infoflow-tbody').innerHTML=flows.map(f=>`<tr>
+    <td><strong style="font-size:12px;color:var(--navy)">${f.team}</strong></td>
+    <td style="font-size:11px">${f.provides}</td>
+    <td><span class="badge bt" style="font-size:10px">${f.when}</span></td>
+    <td style="font-size:11px;color:var(--text2)">${f.used}</td>
+  </tr>`).join('');
+}
+
+function buildCompliance(){
+  const camps=[
+    {name:'CO2 Emissions Collection',type:'Regulatory Compliance',freq:'Quarterly · All active suppliers · Due Jun 30',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',prog:78,submitted:661,pending:186,escalated:8,status:'In progress'},
+    {name:'CBAM Certificate Collection',type:'Regulatory Compliance',freq:'Quarterly · EU-bound suppliers · Due Jun 30',desc:'Collect CBAM certificates for all steel and aluminum imports to EU facilities',prog:82,submitted:312,pending:68,escalated:3,status:'In progress'},
+    {name:'Conflict Minerals (CMRT)',type:'Regulatory Compliance',freq:'Annual Q1 · All Tier 1 and Tier 2',desc:'Dodd-Frank Section 1502 — tantalum, tin, tungsten, gold reporting',prog:94,submitted:452,pending:29,escalated:0,status:'Completed'},
+    {name:'Substance Compliance (RoHS/REACH)',type:'Regulatory Compliance',freq:'Annual Q2 · Regulated material suppliers',desc:'EU RoHS and REACH substance declarations for regulated components',prog:5,submitted:0,pending:380,escalated:0,status:'Scheduled'},
+  ];
+  const statusBadge={'In progress':'ba','Completed':'bg','Scheduled':'bb'};
+  document.getElementById('compliance-cards').innerHTML=camps.map(c=>`
+    <div class="comp-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.freq}</div></div>
+        <span class="badge ${statusBadge[c.status]}">${c.status}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${c.desc}</div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${c.prog}%;background:${c.prog>=80?'var(--green)':c.prog>=50?'var(--amber)':'var(--blue)'}"></div></div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px">${c.prog}% submitted</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
+        <div><div style="font-size:15px;font-weight:500;color:var(--green)">${c.submitted}</div><div style="font-size:9px;color:var(--text2)">Submitted</div></div>
+        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">${c.pending}</div><div style="font-size:9px;color:var(--text2)">Pending</div></div>
+        <div><div style="font-size:15px;font-weight:500;color:${c.escalated>0?'var(--red)':'var(--green)'}">${c.escalated}</div><div style="font-size:9px;color:var(--text2)">Escalated</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════
+// LIVE DATA RENDERERS
+// ═══════════════════════════════════════════════
+function updateMetrics(){
+  const total=suppliers.length,resp=suppliers.filter(s=>s.status==='Responded').length;
+  const pend=suppliers.filter(s=>s.status==='Pending').length,esc=suppliers.filter(s=>s.status==='Escalated').length;
+  const p1=suppliers.filter(s=>s.segment==='Critical / P1').length,wl=suppliers.filter(s=>s.segment==='Watch List').length;
+  const rate=total?Math.round(resp/total*100):0;
+  const noEmail=suppliers.filter(s=>!s.email).length;
+  const dataComp=total?Math.round((total-noEmail)/total*100):0;
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('m-total',total);set('m-rate',rate+'%');set('m-pending',pend);set('m-esc',esc);set('m-p1',p1);set('m-watch',wl);
+  set('d-total',total);set('d-rate',rate+'%');set('d-resp',resp);set('d-esc',esc);set('d-data',dataComp+'%');
+  set('nb-rei',total);set('nb-sup',total);set('nb-esc',esc);
+  set('topbar-sub',total+' suppliers · '+campaigns.length+' campaign'+(campaigns.length!==1?'s':''));
+  set('ov-sub',campaigns.length?campaigns[0].name+' active':'No active campaigns');
+  set('esc-sub',esc+' supplier'+(esc!==1?'s':'')+' requiring immediate action');
+  set('sup-sub',total+' suppliers · '+(noEmail?noEmail+' missing email':'All emails verified')+' · Segment from REI scoring');
+
+  ['Critical / P1','Strategic / P2','Preferred / P3','Approved / P4','Watch List'].forEach((seg,i)=>{
+    const ids=['tier-p1','tier-p2','tier-p3','tier-p4','tier-wl'];
+    const labels=['Critical P1','Strategic P2','Preferred P3','Approved P4','Watch List'];
+    const escs=['7 days','14 days','21 days','30 days','Immediate'];
+    const el=document.getElementById(ids[i]);
+    if(el){const c=suppliers.filter(s=>s.segment===seg).length;el.textContent=`${labels[i]} — ${c} supplier${c!==1?'s':''} — ${escs[i]}`;}
+  });
+}
+
+function updateCharts(){
   const dk=matchMedia('(prefers-color-scheme:dark)').matches;
-  const gc=dk?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.07)', tc=dk?'#888':'#999';
+  const gc=dk?'rgba(255,255,255,0.07)':'rgba(0,0,0,0.06)',tc=dk?'#888':'#999';
+  const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:9}}}}};
+
+  // Region chart
   const regions={};
   suppliers.forEach(s=>{if(!regions[s.region])regions[s.region]={t:0,r:0};regions[s.region].t++;if(s.status==='Responded')regions[s.region].r++;});
-  const rl=Object.keys(regions), rd=rl.map(r=>regions[r].t?Math.round(regions[r].r/regions[r].t*100):0);
-  const rcEl=document.getElementById('regionChart');if(!rcEl)return;
-  if(rChart)rChart.destroy();
-  rChart=new Chart(rcEl,{type:'bar',data:{labels:rl.length?rl:['No data'],datasets:[{data:rl.length?rd:[0],backgroundColor:dk?'#185FA5':'#378ADD',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{min:0,max:100,grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>v+'%'}}}}});
+  const rl=Object.keys(regions),rd=rl.map(r=>regions[r].t?Math.round(regions[r].r/regions[r].t*100):0);
+  makeChart('regionChart',{type:'bar',data:{labels:rl.length?rl:['No data'],datasets:[{data:rl.length?rd:[0],backgroundColor:'#378ADD',borderRadius:4}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}}}});
+
+  // Segment doughnut
   const sc=Object.keys(SEG).map(s=>suppliers.filter(x=>x.segment===s).length);
-  const scEl=document.getElementById('segChart');if(!scEl)return;
-  if(sChart)sChart.destroy();
-  sChart=new Chart(scEl,{type:'doughnut',data:{labels:Object.keys(SEG),datasets:[{data:sc,backgroundColor:['#E24B4A','#BA7517','#378ADD','#639922','#7C3AED'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}}}});
+  makeChart('segChart',{type:'doughnut',data:{labels:Object.keys(SEG),datasets:[{data:sc,backgroundColor:['#E24B4A','#BA7517','#378ADD','#639922','#7C3AED'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}}}});
+
+  // REI scores bar
   const rs=suppliers.slice(0,12);
-  const reiEl=document.getElementById('reiChart');if(!reiEl)return;
-  if(reiCh)reiCh.destroy();
-  reiCh=new Chart(reiEl,{type:'bar',data:{labels:rs.map(s=>s.name.split(' ')[0]),datasets:[{data:rs.map(s=>s.rei),backgroundColor:rs.map(s=>s.rei>4?'#E24B4A':s.rei>0?'#BA7517':'#639922'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:9}}}}}});
+  makeChart('reiChart',{type:'bar',data:{labels:rs.map(s=>s.name.split(' ')[0]),datasets:[{data:rs.map(s=>s.rei),backgroundColor:rs.map(s=>s.rei>4?'#E24B4A':s.rei>0?'#BA7517':'#639922'),borderRadius:3}]},options:{...baseOpts}});
+
+  // Dashboard region
+  makeChart('dashRegionChart',{type:'bar',data:{labels:rl.length?rl:['No data'],datasets:[{data:rl.length?rd:[0],backgroundColor:'#0D9488',borderRadius:4}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}}}});
+
+  // Dashboard tier
+  const tiers=['Tier 1','Tier 2','Tier 3'];
+  const tierData=tiers.map(t=>{const ts=suppliers.filter(s=>s.tier===t);return ts.length?Math.round(ts.filter(s=>s.status==='Responded').length/ts.length*100):0;});
+  makeChart('dashTierChart',{type:'bar',data:{labels:tiers,datasets:[{data:tierData,backgroundColor:'#7C3AED',borderRadius:4}]},options:{...baseOpts,scales:{...baseOpts.scales,y:{...baseOpts.scales.y,min:0,max:100,ticks:{...baseOpts.scales.y.ticks,callback:v=>v+'%'}}}}});
+
+  // Trend charts
   const qs=['Q3 2025','Q4 2025','Q1 2026','Q2 2026'];
   const rdata=[{l:'N. America',d:[0.82,0.85,0.87,0.89],c:'#378ADD'},{l:'Europe',d:[0.74,0.78,0.80,0.82],c:'#639922'},{l:'Asia Pacific',d:[0.58,0.62,0.68,0.71],c:'#E24B4A'},{l:'India',d:[0.62,0.65,0.70,0.74],c:'#BA7517'},{l:'Mexico',d:[0.79,0.81,0.83,0.85],c:'#7C3AED'}];
-  const trEl=document.getElementById('trendRegion');if(!trEl)return;
-  if(trendR)trendR.destroy();
-  trendR=new Chart(trEl,{type:'line',data:{labels:qs,datasets:rdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{responsive:true,maintainAspectRatio:false,pl,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{min:0.5,max:1,grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v*100)+'%'}}}}});
-  const cdata=[{l:'Regulatory Compliance',d:[0.72,0.78,0.82,0.86],c:'#378ADD'},{l:'Risk Assessment',d:[0.68,0.74,0.79,0.82],c:'#639922'},{l:'Corrective Action',d:[0.85,0.88,0.91,0.93],c:'#E24B4A'},{l:'Contact Verification',d:[0.78,0.82,0.85,0.87],c:'#BA7517'}];
-  const tcEl=document.getElementById('trendCamp');if(!tcEl)return;
-  if(trendC)trendC.destroy();
-  trendC=new Chart(tcEl,{type:'line',data:{labels:qs,datasets:cdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:10},color:tc,boxWidth:10,padding:8}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{min:0.6,max:1,grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>Math.round(v*100)+'%'}}}}});
+  const lineOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},color:tc,boxWidth:10,padding:7}}},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:9}}},y:{min:0.5,max:1,grid:{color:gc},ticks:{color:tc,font:{size:9},callback:v=>Math.round(v*100)+'%'}}}};
+  makeChart('trendRegion',{type:'line',data:{labels:qs,datasets:rdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:lineOpts});
+  const cdata=[{l:'Regulatory',d:[0.72,0.78,0.82,0.86],c:'#378ADD'},{l:'Risk Assess.',d:[0.68,0.74,0.79,0.82],c:'#639922'},{l:'Corrective',d:[0.85,0.88,0.91,0.93],c:'#E24B4A'},{l:'Contact Verif.',d:[0.78,0.82,0.85,0.87],c:'#BA7517'}];
+  makeChart('trendCamp',{type:'line',data:{labels:qs,datasets:cdata.map(r=>({label:r.l,data:r.d,borderColor:r.c,backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:r.c}))},options:{...lineOpts,scales:{...lineOpts.scales,y:{...lineOpts.scales.y,min:0.6}}}});
 }
 
-function updateGap() {
-  const el=document.getElementById('gap-analysis');
-  const esc=suppliers.filter(s=>s.status==='Escalated'), wl=suppliers.filter(s=>s.segment==='Watch List'), noEmail=suppliers.filter(s=>!s.email);
-  const total=suppliers.length, resp=suppliers.filter(s=>s.status==='Responded').length, rate=total?Math.round(resp/total*100):0;
+function updateGap(){
+  const el=document.getElementById('gap-analysis');if(!el)return;
+  const esc=suppliers.filter(s=>s.status==='Escalated'),wl=suppliers.filter(s=>s.segment==='Watch List'),noEmail=suppliers.filter(s=>!s.email);
+  const total=suppliers.length,resp=suppliers.filter(s=>s.status==='Responded').length,rate=total?Math.round(resp/total*100):0;
   let h='';
-  if(esc.length)h+=`<div class="irow"><div class="adot" style="background:#E24B4A"></div><div><div style="font-size:13px;font-weight:500">${esc.length} supplier${esc.length>1?'s':''} escalated — category manager action required immediately</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${esc.map(s=>s.name).join(', ')}</div></div></div>`;
-  if(wl.length)h+=`<div class="irow"><div class="adot" style="background:#7C3AED"></div><div><div style="font-size:13px;font-weight:500">${wl.length} Watch List supplier${wl.length>1?'s':''} — financial risk flag or repeated performance failures</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Review REI scores. Consider alternate sourcing: ${wl.map(s=>s.name).join(', ')}</div></div></div>`;
-  if(noEmail.length)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">${noEmail.length} supplier${noEmail.length>1?'s':''} missing contact email — outreach will bounce</div><div style="font-size:12px;color:var(--text2);margin-top:2px">${noEmail.map(s=>s.name).join(', ')}</div></div></div>`;
-  if(rate<85&&total>0)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">Response rate ${rate}% is below 85% target — ${total-resp} suppliers still pending</div><div style="font-size:12px;color:var(--text2);margin-top:2px">P1 suppliers escalate after 7 days. P2 after 14 days. Check escalation log for overdue suppliers.</div></div></div>`;
+  if(!total){h='<div class="empty" style="padding:1.5rem"><i class="ti ti-chart-bar"></i><p>Add suppliers to generate gap analysis</p></div>';el.innerHTML=h;return;}
+  if(esc.length)h+=`<div class="irow"><div class="adot" style="background:#E24B4A"></div><div><div style="font-size:13px;font-weight:500">${esc.length} supplier${esc.length>1?'s':''} escalated — category manager action required immediately</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${esc.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(wl.length)h+=`<div class="irow"><div class="adot" style="background:#7C3AED"></div><div><div style="font-size:13px;font-weight:500">${wl.length} Watch List supplier${wl.length>1?'s':''} — financial risk or repeated performance failures</div><div style="font-size:11px;color:var(--text2);margin-top:3px">Review REI scores and consider alternate sourcing: ${wl.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(noEmail.length)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">${noEmail.length} supplier${noEmail.length>1?'s':''} missing contact email — outreach will bounce</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${noEmail.map(s=>s.name).join(', ')}</div></div></div>`;
+  if(rate<85)h+=`<div class="irow"><div class="adot" style="background:#BA7517"></div><div><div style="font-size:13px;font-weight:500">Response rate ${rate}% is below 85% target — ${total-resp} suppliers still pending</div><div style="font-size:11px;color:var(--text2);margin-top:3px">P1 suppliers escalate after 7 days · P2 after 14 days · Check escalation log for overdue suppliers</div></div></div>`;
   if(!h)h='<div style="padding:1rem 0;font-size:13px;color:var(--text2)">No critical gaps. Response rates and data completeness look good.</div>';
   el.innerHTML=h;
 }
 
-function renderActivity() {
-  const el=document.getElementById('activity-log');
-  el.innerHTML=activity.slice(0,6).map(a=>`<div class="irow"><div class="adot" style="background:${a.color}"></div><div><div style="font-size:13px">${a.msg}</div><div style="font-size:11px;color:var(--text3);margin-top:1px">${a.time}</div></div></div>`).join('');
+function renderActivity(){
+  const el=document.getElementById('activity-log');if(!el)return;
+  if(!activity.length){el.innerHTML='<div class="empty" style="padding:1rem"><i class="ti ti-clock"></i><p>Activity appears here</p></div>';return;}
+  el.innerHTML=activity.slice(0,6).map(a=>`<div class="irow"><div class="adot" style="background:${a.color}"></div><div><div style="font-size:13px">${a.msg}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${a.time}</div></div></div>`).join('');
 }
 
-function renderREI() {
-  document.getElementById('rei-tbody').innerHTML=suppliers.map((s,i)=>{
-    const {bg,fg}=SEG[s.segment]||{};
-    const rb=s.rei>4?'#FEF2F2':s.rei>0?'#FFFBEB':'#F0FDF4', rf=s.rei>4?'#991B1B':s.rei>0?'#92400E':'#14532D';
-    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="text-align:center">${s.ttr}</td><td style="text-align:center">${s.tts}</td><td style="text-align:center;font-weight:500;background:${rb};color:${rf}">${s.rei}</td><td style="text-align:center">${s.single||'No'}</td><td style="text-align:center">$${(+s.spend).toLocaleString()}K</td><td style="text-align:center">${s.fin||'No'}</td><td style="text-align:center;font-weight:500;color:#0D9488">${s.comp}</td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="text-align:center;font-size:11px;font-weight:500;color:${fg}">${s.esc}</td></tr>`;
+function renderREI(){
+  const el=document.getElementById('rei-tbody');if(!el)return;
+  if(!suppliers.length){el.innerHTML='<tr><td colspan="11"><div class="empty" style="padding:1.5rem"><i class="ti ti-chart-radar"></i><p>Add suppliers to see REI scores</p></div></td></tr>';return;}
+  el.innerHTML=suppliers.map(s=>{
+    const{bg,fg}=SEG[s.segment]||{bg:'#fff',fg:'#333'};
+    const rb=s.rei>4?'#FEF2F2':s.rei>0?'#FFFBEB':'#F0FDF4',rf=s.rei>4?'#991B1B':s.rei>0?'#92400E':'#14532D';
+    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="text-align:center">${s.ttr}</td><td style="text-align:center">${s.tts}</td><td style="text-align:center;font-weight:600;background:${rb};color:${rf}">${s.rei}</td><td style="text-align:center">${s.single||'No'}</td><td>$${(+s.spend).toLocaleString()}K</td><td style="text-align:center">${s.fin||'No'}</td><td style="text-align:center;font-weight:600;color:#0D9488">${s.comp}</td><td><span class="badge" style="background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px;font-weight:600;color:${fg}">${s.esc}</td></tr>`;
   }).join('');
 }
 
-function renderSup(list) {
-  document.getElementById('sup-tbody').innerHTML=(list||suppliers).map(s=>{
-    const {bg,fg}=SEG[s.segment]||{};
-    const eb=!s.email?'var(--redbg)':'transparent', ef=!s.email?'var(--redtext)':'var(--text)';
-    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px">${s.tier}</td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.contact||'—'}</td><td style="font-size:11px;background:${eb};color:${ef}">${s.email||'⚠ MISSING'}</td><td style="font-size:11px">${s.portal||'—'}</td><td style="font-size:11px;font-weight:500;color:${fg}">${s.esc}</td></tr>`;
+function renderSup(list){
+  const el=document.getElementById('sup-tbody');if(!el)return;
+  const data=list||suppliers;
+  if(!data.length){el.innerHTML='<tr><td colspan="8"><div class="empty" style="padding:1.5rem"><i class="ti ti-building-factory"></i><p>No suppliers match filter</p></div></td></tr>';return;}
+  el.innerHTML=data.map(s=>{
+    const{bg,fg}=SEG[s.segment]||{bg:'#fff',fg:'#333'};
+    const eb=!s.email?'var(--redbg)':'transparent',ef=!s.email?'var(--redtext)':'var(--text)';
+    return `<tr><td><strong style="font-size:12px">${s.name}</strong></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px">${s.tier}</td><td><span class="badge" style="background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.contact||'—'}</td><td style="font-size:11px;background:${eb};color:${ef}">${s.email||'⚠ MISSING'}</td><td style="font-size:11px">${s.portal||'—'}</td><td style="font-size:11px;font-weight:600;color:${fg}">${s.esc}</td></tr>`;
   }).join('');
 }
 
-function filterSup(val) {
-  renderSup(val==='all'?suppliers:suppliers.filter(s=>s.segment===val));
-}
+function filterSup(val){renderSup(val==='all'?suppliers:suppliers.filter(s=>s.segment===val));}
 
-function renderCampaigns() {
-  const el=document.getElementById('campaigns-list');
-  if(!campaigns.length){el.innerHTML='<div class="empty"><i class="ti ti-speakerphone"></i><p>No campaigns yet</p></div>';return;}
-  const resp=suppliers.filter(s=>s.status==='Responded').length, total=suppliers.length||1;
-  const rate=Math.round(resp/total*100), pend=suppliers.filter(s=>s.status==='Pending').length;
+function renderCampaigns(){
+  const el=document.getElementById('campaigns-list');if(!el)return;
+  if(!campaigns.length){el.innerHTML='<div class="empty"><i class="ti ti-speakerphone"></i><p>No campaigns yet — click New campaign to start</p></div>';return;}
+  const resp=suppliers.filter(s=>s.status==='Responded').length,total=suppliers.length||1;
+  const rate=Math.round(resp/total*100),pend=suppliers.filter(s=>s.status==='Pending').length,esc=suppliers.filter(s=>s.status==='Escalated').length;
   el.innerHTML=campaigns.map((c,ci)=>`<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-      <div><div style="font-size:14px;font-weight:500">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.type} · Due ${c.due} · ${c.priority} priority</div>${c.desc?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${c.desc}</div>`:''}</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div><div style="font-size:14px;font-weight:500">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.type} · Due ${c.due} · ${c.priority} priority · Created ${c.created}</div>${c.desc?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${c.desc}</div>`:''}</div>
       <span class="badge ${c.status==='active'?'ba':'bg'}">${c.status==='active'?'In progress':'Completed'}</span>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Response rate</div><div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="height:100%;width:${rate}%;background:${rate>=80?'var(--green)':rate>=50?'var(--amber)':'var(--red)'};border-radius:4px"></div></div><div style="font-size:11px;color:var(--text2);margin-top:3px">${rate}% (${resp} of ${total} suppliers)</div></div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center">
-        <div style="background:var(--greenbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--greentext)">${resp}</div><div style="font-size:9px;color:var(--greentext)">Responded</div></div>
-        <div style="background:var(--amberbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--ambertext)">${pend}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
-        <div style="background:var(--redbg);border-radius:6px;padding:6px"><div style="font-size:14px;font-weight:500;color:var(--redtext)">${suppliers.filter(s=>s.status==='Escalated').length}</div><div style="font-size:9px;color:var(--redtext)">Escalated</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Response rate — target 85%</div>
+        <div class="prog-bar"><div class="prog-fill" style="width:${rate}%;background:${rate>=85?'var(--green)':rate>=60?'var(--amber)':'var(--red)'}"></div></div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${rate}% · ${resp} of ${total} suppliers</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">
+        <div style="background:var(--greenbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--greentext)">${resp}</div><div style="font-size:9px;color:var(--greentext)">Responded</div></div>
+        <div style="background:var(--amberbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--ambertext)">${pend}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
+        <div style="background:var(--redbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--redtext)">${esc}</div><div style="font-size:9px;color:var(--redtext)">Escalated</div></div>
       </div>
     </div>
-    <div style="border-top:0.5px solid var(--border);padding-top:10px">
-      <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Update supplier status — change dropdown as suppliers submit data:</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+    <div style="border-top:0.5px solid var(--border);padding-top:12px">
+      <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Update supplier status — change dropdown as suppliers respond. Escalation flags trigger automatically per REI segment window.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
         ${suppliers.map((s,si)=>{
-          const {fg}=SEG[s.segment]||{fg:'#333'};
+          const{fg}=SEG[s.segment]||{fg:'#333'};
           const sBg=s.status==='Responded'?'var(--greenbg)':s.status==='Escalated'?'var(--redbg)':'var(--amberbg)';
           const sFg=s.status==='Responded'?'var(--greentext)':s.status==='Escalated'?'var(--redtext)':'var(--ambertext)';
-          return `<div style="display:flex;align-items:center;gap:4px;background:var(--bg2);border-radius:6px;padding:3px 8px 3px 3px">
-            <select onchange="updateStatus(${si},this.value)" style="font-size:10px;padding:1px 4px;background:${sBg};color:${sFg};font-weight:500;border:none;border-radius:4px;width:auto;cursor:pointer">
+          return `<div style="display:flex;align-items:center;gap:3px;background:var(--bg2);border-radius:6px;padding:3px 8px 3px 3px">
+            <select onchange="updateStatus(${si},this.value)" style="font-size:10px;padding:2px 4px;background:${sBg};color:${sFg};font-weight:600;border:none;border-radius:4px;width:auto;cursor:pointer">
               <option ${s.status==='Pending'?'selected':''}>Pending</option>
               <option ${s.status==='Responded'?'selected':''}>Responded</option>
               <option ${s.status==='Escalated'?'selected':''}>Escalated</option>
             </select>
             <span style="font-size:10px;color:var(--text2)">${s.name.split(' ')[0]}</span>
-            <span style="font-size:9px;color:${SEG[s.segment]?.fg||'#666'}">${s.esc}</span>
+            <span style="font-size:9px;color:${fg};font-weight:600">${s.esc}</span>
           </div>`;
         }).join('')}
       </div>
@@ -804,68 +1212,72 @@ function renderCampaigns() {
   </div>`).join('');
 }
 
-function renderEsc() {
-  const el=document.getElementById('esc-list');
+function renderEsc(){
+  const el=document.getElementById('esc-list');if(!el)return;
   const esc=suppliers.filter(s=>s.status==='Escalated');
   if(!esc.length){el.innerHTML='<div class="empty"><i class="ti ti-alert-triangle"></i><p>No escalations. Suppliers marked Escalated populate here automatically.</p></div>';return;}
-  el.innerHTML=`<div class="card" style="padding:0;overflow:hidden"><table>
+  el.innerHTML=`<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table>
     <thead><tr><th>Supplier</th><th>Segment</th><th>Region</th><th>Email</th><th>Esc Window</th><th>Action</th></tr></thead>
     <tbody>${esc.map(s=>{
       const i=suppliers.indexOf(s);
-      const {bg,fg}=SEG[s.segment]||{};
-      return `<tr><td><strong style="color:var(--redtext)">${s.name}</strong></td><td><span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px;color:${!s.email?'var(--redtext)':'var(--text)'}">${s.email||'No email'}</td><td style="font-size:11px;font-weight:500;color:var(--redtext)">${s.esc}</td><td><button class="btn" style="font-size:11px;padding:3px 8px" onclick="updateStatus(${i},'Responded')">Mark responded</button></td></tr>`;
+      const{bg,fg}=SEG[s.segment]||{bg:'#fff',fg:'#333'};
+      return `<tr><td><strong style="color:var(--redtext)">${s.name}</strong></td><td><span class="badge" style="background:${bg};color:${fg}">${s.segment}</span></td><td style="font-size:11px">${s.region}</td><td style="font-size:11px;color:${!s.email?'var(--redtext)':'var(--text)'}">${s.email||'No email on file'}</td><td style="font-size:11px;font-weight:600;color:var(--redtext)">${s.esc}</td><td><button class="btn" style="font-size:11px;padding:3px 8px" onclick="updateStatus(${i},'Responded')">Mark responded</button></td></tr>`;
     }).join('')}</tbody>
-  </table></div>`;
+  </table></div></div>`;
 }
 
-function updateStatus(i, val) {
+// ═══════════════════════════════════════════════
+// USER ACTIONS
+// ═══════════════════════════════════════════════
+function updateStatus(i,val){
   const old=suppliers[i].status;
   suppliers[i].status=val;
   activity.unshift({msg:`${suppliers[i].name}: status changed from ${old} to ${val}`,color:val==='Responded'?'#639922':val==='Escalated'?'#E24B4A':'#BA7517',time:new Date().toLocaleString()});
-  updateAll();
+  renderAll();
 }
 
-function saveREISupplier() {
+function saveREISupplier(){
   const name=document.getElementById('rs-name').value.trim();
   if(!name){alert('Supplier name required');return;}
-  const s={name,region:document.getElementById('rs-region').value,tier:document.getElementById('rs-tier').value,spend:document.getElementById('rs-spend').value,ttr:document.getElementById('rs-ttr').value,tts:document.getElementById('rs-tts').value,single:document.getElementById('rs-single').value,fin:document.getElementById('rs-fin').value,perf:document.getElementById('rs-perf').value,email:document.getElementById('rs-email').value.trim(),contact:document.getElementById('rs-contact').value.trim(),portal:document.getElementById('rs-portal').value,status:'Pending'};
-  const {rei,comp,seg,esc}=calcREI(s);
+  const s={name,region:document.getElementById('rs-region').value,tier:document.getElementById('rs-tier').value,spend:document.getElementById('rs-spend').value||0,ttr:document.getElementById('rs-ttr').value||0,tts:document.getElementById('rs-tts').value||0,single:document.getElementById('rs-single').value,fin:document.getElementById('rs-fin').value,perf:document.getElementById('rs-perf').value,email:document.getElementById('rs-email').value.trim(),contact:document.getElementById('rs-contact').value.trim(),portal:document.getElementById('rs-portal').value,status:'Pending'};
+  const{rei,comp,seg,esc}=calcREI(s);
   suppliers.push({...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei,comp,segment:seg,esc});
   activity.unshift({msg:`REI scored: ${name} — ${seg} (REI: ${rei}, Score: ${comp})`,color:'#0D9488',time:new Date().toLocaleString()});
   closeModal('rei_supplier');
-  updateAll();
-  ['rs-name','rs-spend','rs-ttr','rs-tts','rs-email','rs-contact'].forEach(id=>document.getElementById(id).value='');
+  renderAll();
+  ['rs-name','rs-spend','rs-ttr','rs-tts','rs-email','rs-contact'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 
-function saveCampaign() {
-  const name=document.getElementById('c-name').value.trim(), due=document.getElementById('c-due').value;
+function saveCampaign(){
+  const name=document.getElementById('c-name').value.trim(),due=document.getElementById('c-due').value;
   if(!name||!due){alert('Campaign name and due date required');return;}
   campaigns.push({id:Date.now(),name,type:document.getElementById('c-type').value,due,priority:document.getElementById('c-pri').value,desc:document.getElementById('c-desc').value.trim(),status:'active',created:new Date().toLocaleDateString()});
   activity.unshift({msg:`Campaign launched: "${name}" targeting ${suppliers.length} suppliers`,color:'#378ADD',time:new Date().toLocaleString()});
   closeModal('campaign');
-  ['c-name','c-desc','c-due'].forEach(id=>document.getElementById(id).value='');
-  updateAll();
+  ['c-name','c-desc','c-due'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderAll();
 }
 
-function importCSV(input) {
+function importCSV(input){
   const file=input.files[0];if(!file)return;
   Papa.parse(file,{header:true,skipEmptyLines:true,complete:function(r){
     let added=0;
     r.data.forEach(row=>{
       const name=(row['Name']||'').trim();if(!name)return;
-      const s={name,region:row['Region']||'Other',tier:row['Tier']||'Tier 2',spend:row['Spend ($K)']||'0',ttr:row['TTR']||'4',tts:row['TTS']||'2',single:row['Single Source']||'No',fin:row['Financial Risk']||'No',perf:row['Performance']||'3',contact:row['Contact Name']||'',email:row['Contact Email']||'',portal:row['Portal Status']||'Pending',status:'Pending'};
-      const {rei,comp,seg,esc}=calcREI(s);
+      const s={name,region:row['Region']||'Other',tier:row['Tier']||'Tier 2',spend:row['Spend ($K)']||0,ttr:row['TTR']||4,tts:row['TTS']||2,single:row['Single Source']||'No',fin:row['Financial Risk']||'No',perf:row['Performance']||3,contact:row['Contact Name']||'',email:row['Contact Email']||'',portal:row['Portal Status']||'Pending',status:'Pending'};
+      const{rei,comp,seg,esc}=calcREI(s);
       suppliers.push({...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei,comp,segment:seg,esc});
       added++;
     });
     input.value='';
     activity.unshift({msg:`CSV import: ${added} suppliers imported and REI-scored`,color:'#639922',time:new Date().toLocaleString()});
-    updateAll();
-    document.getElementById('import-result').innerHTML=`<div style="background:var(--greenbg);color:var(--greentext);padding:10px 14px;border-radius:var(--r);font-size:13px">${added} suppliers imported successfully</div>`;
+    renderAll();
+    const res=document.getElementById('import-result');
+    if(res)res.innerHTML=`<div style="background:var(--greenbg);color:var(--greentext);padding:10px 14px;border-radius:var(--r);font-size:13px">${added} suppliers imported and REI-scored successfully</div>`;
   }});
 }
 
-function downloadSample() {
+function downloadSample(){
   const csv=`Name,Region,Tier,TTR,TTS,Single Source,Spend ($K),Financial Risk,Performance,Contact Name,Contact Email,Portal Status
 Bosch GmbH,Europe,Tier 1,12,2,Yes,8500,No,5,Anna Muller,a.muller@bosch.com,Registered
 BorgWarner,N. America,Tier 1,16,2,Yes,6200,No,5,Steve Hunt,s.hunt@borgwarner.com,Registered
@@ -875,60 +1287,51 @@ Foshan Manufacturing,Asia Pacific,Tier 2,20,1,No,320,Yes,2,Wei Zhang,,Not Regist
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='supplier-template.csv';a.click();
 }
 
-
-function toggleDemo() {
-  const btn = document.getElementById('demo-btn');
-  if(suppliers.length > 0 && suppliers[0].name === 'Bosch GmbH') {
-    // Switch to live mode — clear all data
-    if(confirm('Clear demo data and start fresh with your own suppliers?')) {
-      suppliers = [];
-      campaigns = [];
-      activity = [];
-      btn.innerHTML = '<i class="ti ti-edit" style="font-size:10px"></i> Live mode — add your suppliers';
-      btn.style.background = 'var(--bluebg)';
-      btn.style.color = 'var(--bluetext)';
-      btn.style.borderColor = 'var(--blue)';
-      updateAll();
-      renderREI();
-      renderSup(suppliers);
-      renderCampaigns();
-      renderEsc();
-      renderActivity();
+function toggleDemo(){
+  const btn=document.getElementById('demo-btn');
+  if(suppliers.length>0&&suppliers[0].name==='Bosch GmbH'){
+    if(confirm('Clear demo data and start with your own suppliers?')){
+      suppliers=[];campaigns=[];activity=[];
+      if(btn){btn.innerHTML='<i class="ti ti-edit" style="font-size:10px"></i> Live mode — add your suppliers';btn.style.background='var(--bluebg)';btn.style.color='var(--bluetext)';btn.style.borderColor='var(--blue)';}
+      renderAll();
     }
-  } else {
-    // Reload demo data
-    location.reload();
-  }
+  }else{location.reload();}
 }
-function openModal(t){var el=document.getElementById('modal-'+t);if(el){el.style.display='';el.classList.add('open');}}
+
+function openModal(t){const el=document.getElementById('modal-'+t);if(el){el.style.display='';el.classList.add('open');}}
+function toggleHelp(el){el.classList.toggle('open');}
+
 function showPage(n,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-  document.getElementById('page-'+n).classList.add('active');
+  const pg=document.getElementById('page-'+n);if(pg)pg.classList.add('active');
   if(el)el.classList.add('active');
-  renderREI();
-  renderSup(suppliers);
-  renderCampaigns();
-  renderEsc();
-  renderActivity();
-  updateAll();
-  setTimeout(function() { updateCharts(); }, 50);
-}
-function toggleHelp(el){
-  el.classList.toggle('open');
-  const icon=el.querySelector('.ti-chevron-down');
-  if(icon)icon.style.transform=el.classList.contains('open')?'rotate(180deg)':'';
+  renderAll();
+  setTimeout(updateCharts,80);
 }
 
-window.addEventListener('load', function() {
+function renderAll(){
+  updateMetrics();
   renderREI();
   renderSup(suppliers);
   renderCampaigns();
   renderEsc();
   renderActivity();
-  updateAll();
-  // Charts need a small delay to ensure canvas dimensions are set
-  setTimeout(function() { updateCharts(); }, 100);
+  updateGap();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('load',function(){
+  buildCalendar();
+  buildRaci();
+  buildTimeline();
+  buildContactGov();
+  buildStakeholder();
+  buildCompliance();
+  renderAll();
+  setTimeout(updateCharts,100);
 });
 </script>
 </body>
