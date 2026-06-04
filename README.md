@@ -13,8 +13,8 @@ Built to demonstrate end-to-end program management capability across supplier co
 | Deliverable | What it is |
 |---|---|
 | **[Live Web Platform](https://tejaswismandadi.github.io/Supplier-Comms-Intelligence/)** | 15-tab interactive PM tool covering strategy, operations, intelligence, and governance |
-| **Supplier_Comms_REI_Tool.xlsx** | 10-sheet connected Excel workbook with 299 live formulas |
-| **Supplier_Comms_Program_Plan.pdf** | 8-slide program plan covering the problem, REI method, campaign types, process flow, and metrics |
+| **[Download Excel Operations Tool](https://github.com/Tejaswismandadi/Supplier-Comms-Intelligence/raw/main/Supplier_Comms_REI_Tool.xlsx)** | 10-sheet connected Excel workbook with 299 live formulas |
+| **[Download Program Plan PDF](https://github.com/Tejaswismandadi/Supplier-Comms-Intelligence/raw/main/Supplier_Comms_Program_Plan.pdf)** | 8-slide program plan covering the problem, REI method, campaign types, process flow, and metrics |
 
 ---
 
