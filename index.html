@@ -516,7 +516,7 @@ function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.clas
     <i class="ti ti-chevron-down"></i>
   </div>
   <div class="page-hdr"><div><div class="page-title">Compliance Campaigns</div><div class="page-sub">Trade compliance data collection — regulatory obligations tracking</div></div></div>
-  <div class="grid2" id="compliance-cards"></div>
+  <div id="compliance-cards"></div>
   <div class="card">
     <div class="card-title">CBAM project — Kearney consulting, Nexteer Automotive (2025)</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:12px">
@@ -792,7 +792,75 @@ const DEMO=[
 ];
 
 let suppliers=DEMO.map(s=>{const r=calcREI(s);return{...s,ttr:+s.ttr,tts:+s.tts,spend:+s.spend,perf:+s.perf,rei:r.rei,comp:r.comp,segment:r.seg,esc:r.esc};});
-let campaigns=[{id:1,name:'Q2 Compliance Data Collection — CO2 Emissions',type:'Regulatory Compliance',due:'2026-06-30',priority:'High',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',status:'active',created:'Jun 1, 2026'}];
+let campaigns=[
+  {
+    id:1,
+    name:'Q2 Compliance — CO2 Emissions',
+    type:'Regulatory Compliance',
+    due:'2026-06-30',
+    priority:'High',
+    desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting.',
+    status:'active',
+    created:'Jun 1, 2026',
+    targetAll:true,
+    supplierStatuses:{},
+  },
+  {
+    id:2,
+    name:'Business Continuity Assessment — P1 and P2 Suppliers',
+    type:'Risk and Financial Health',
+    due:'2026-07-15',
+    priority:'High',
+    desc:'Confirm BCP status, disaster recovery readiness, and alternate sourcing options for Critical P1 and Strategic P2 suppliers.',
+    status:'active',
+    created:'May 15, 2026',
+    targetSegments:['Critical / P1','Strategic / P2'],
+    supplierStatuses:{
+      'Bosch GmbH':'Responded',
+      'BorgWarner':'Responded',
+      'Gentex Corporation':'Pending',
+      'Magna International':'Responded',
+      'Aptiv PLC':'Responded',
+      'Yanfeng Automotive':'Pending',
+      'Lear Corporation':'Responded',
+      'Grupo Antolin':'Pending',
+      'Motherson Group':'Pending',
+      'Adient':'Responded',
+    },
+  },
+  {
+    id:3,
+    name:'Corrective Action — Zhejiang Components',
+    type:'Performance and Corrective Action',
+    due:'2026-06-17',
+    priority:'High',
+    desc:'Root cause analysis and CAP required following 2 consecutive late deliveries in Q1 2026. 7-day escalation window applies.',
+    status:'active',
+    created:'Jun 3, 2026',
+    targetSuppliers:['Zhejiang Components'],
+    supplierStatuses:{
+      'Zhejiang Components':'Escalated',
+    },
+  },
+  {
+    id:4,
+    name:'Contact Verification — Semi-Annual Q1 2026',
+    type:'Contact and Master Data',
+    due:'2026-04-30',
+    priority:'Medium',
+    desc:'Verify primary and backup contacts for all active suppliers. Resolved 1 bouncing email. 5 portal registrations pending.',
+    status:'closed',
+    created:'Mar 1, 2026',
+    targetAll:true,
+    supplierStatuses:{
+      'Bosch GmbH':'Responded','BorgWarner':'Responded','Gentex Corporation':'Responded',
+      'Magna International':'Responded','Aptiv PLC':'Responded','Yanfeng Automotive':'Responded',
+      'Lear Corporation':'Responded','Grupo Antolin':'Responded','Motherson Group':'Responded',
+      'Adient':'Responded','Tata Steel':'Responded','Minda Industries':'Responded',
+      'Webasto':'Responded','Foshan Manufacturing':'Escalated','Zhejiang Components':'Responded',
+    },
+  },
+];
 let activity=[
   {msg:'Foshan Manufacturing escalated — no response in 42 days. Category manager notified.',color:'#E24B4A',time:'Jun 3, 2026 09:15'},
   {msg:'Zhejiang Components escalated — 2 reminders sent, no response.',color:'#E24B4A',time:'Jun 2, 2026 14:30'},
@@ -971,98 +1039,174 @@ function buildContactGov(){
       </div>
     </div>`).join('');
 
-  const health=[
-    {name:'Bosch GmbH',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
-    {name:'BorgWarner',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
-    {name:'Gentex Corporation',seg:'Critical / P1',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
-    {name:'Magna International',seg:'Strategic / P2',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
-    {name:'Aptiv PLC',seg:'Strategic / P2',last:'2026-03-01',next:'2026-09-01',email:'Verified',portal:'Registered',action:'None'},
-    {name:'Tata Steel',seg:'Preferred / P3',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
-    {name:'Minda Industries',seg:'Preferred / P3',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
-    {name:'Webasto',seg:'Approved / P4',last:'2025-09-01',next:'2026-09-01',email:'Verified',portal:'Pending',action:'Complete portal registration'},
-    {name:'Foshan Manufacturing',seg:'Watch List',last:'2025-03-01',next:'2026-03-01',email:'BOUNCING',portal:'Not Registered',action:'URGENT: find valid email via category manager'},
-    {name:'Zhejiang Components',seg:'Watch List',last:'2025-09-01',next:'2026-03-01',email:'Verified',portal:'Not Registered',action:'Complete portal registration'},
-  ];
-  document.getElementById('gov-tbody').innerHTML=health.map(h=>{
-    const{bg,fg}=SEG[h.seg]||{bg:'white',fg:'#333'};
-    const eBg=h.email==='BOUNCING'?'var(--redbg)':'var(--greenbg)';
-    const eFg=h.email==='BOUNCING'?'var(--redtext)':'var(--greentext)';
-    const aBg=h.action.includes('URGENT')?'var(--redbg)':h.action!=='None'?'var(--amberbg)':'var(--greenbg)';
-    const aFg=h.action.includes('URGENT')?'var(--redtext)':h.action!=='None'?'var(--ambertext)':'var(--greentext)';
-    return `<tr>
-      <td><strong style="font-size:12px">${h.name}</strong></td>
-      <td><span class="badge" style="background:${bg};color:${fg}">${h.seg}</span></td>
-      <td style="font-size:11px">${h.last}</td>
-      <td style="font-size:11px">${h.next}</td>
-      <td style="font-size:11px;background:${eBg};color:${eFg};font-weight:500">${h.email}</td>
-      <td style="font-size:11px">${h.portal}</td>
-      <td style="font-size:11px;background:${aBg};color:${aFg};font-weight:${h.action.includes('URGENT')?'700':'400'}">${h.action}</td>
-    </tr>`;
-  }).join('');
+  // Contact health tracker pulls live from suppliers array
+  renderGovTable();
+  // Update header to show live count
+  const hdr=document.querySelector('#page-contact_gov .page-sub');
+  if(hdr)hdr.textContent=suppliers.length+' suppliers tracked · '+suppliers.filter(s=>!s.email).length+' missing emails · '+suppliers.filter(s=>s.portal!=='Registered').length+' portal pending';
 }
 
 function buildStakeholder(){
+  renderStakeholder();
+}
+
+function renderStakeholder(){
+  // Pull live numbers from suppliers and campaigns
+  const total=suppliers.length;
+  const esc=suppliers.filter(s=>s.status==='Escalated').length;
+  const wl=suppliers.filter(s=>s.segment==='Watch List').length;
+  const resp=suppliers.filter(s=>s.status==='Responded').length;
+  const rate=total?Math.round(resp/total*100):0;
+  const noEmail=suppliers.filter(s=>!s.email).length;
+  const noPotal=suppliers.filter(s=>s.portal!=='Registered').length;
+  const activeCamp=campaigns.find(c=>c.status==='active');
+  const campName=activeCamp?activeCamp.name:'No active campaign';
+  const campDue=activeCamp?activeCamp.due:'—';
+  const p1=suppliers.filter(s=>s.segment==='Critical / P1').length;
+
+  // Update page subtitle with live counts
+  const sub=document.querySelector('#page-stakeholder .page-sub');
+  if(sub)sub.textContent=total+' suppliers · '+esc+' escalated · '+campaigns.length+' campaign'+(campaigns.length!==1?'s':'')+' active';
+
   const cadence=[
-    {who:'Global Operations Leadership',type:'Monthly Program Health Report',freq:'Monthly',purpose:'Report response rates, escalations, and program health vs targets',delivers:'Dashboard summary, gap analysis, recommended actions',status:'Active'},
-    {who:'Sourcing and Category Managers',type:'Weekly Escalation Review',freq:'Weekly',purpose:'Align on escalated suppliers requiring category manager intervention',delivers:'Escalation log with supplier names, days overdue, recommended actions',status:'Active'},
-    {who:'Compliance Team',type:'Pre-Campaign Alignment',freq:'Before each compliance campaign',purpose:'Confirm data requirements, regulatory deadlines, submission format',delivers:'Campaign brief with target suppliers, data template, submission timeline',status:'Active'},
-    {who:'Supplier Quality Engineering',type:'Corrective Action Review',freq:'Bi-weekly',purpose:'Review open corrective actions and agree on escalation decisions',delivers:'Open CAR status by supplier with days outstanding and next actions',status:'Active'},
-    {who:'IT and Data Team',type:'System and Data Review',freq:'Monthly',purpose:'Review portal registrations, contact data completeness, system issues',delivers:'Contact health report showing bouncing emails and incomplete profiles',status:'Active'},
-    {who:'Finance Team',type:'CBAM and Cost Impact Brief',freq:'Quarterly',purpose:'Share carbon cost exposure from CBAM compliance data collected',delivers:'CBAM cost liability estimate by supplier and region',status:'Active'},
+    {
+      who:'Global Operations Leadership',
+      type:'Monthly Program Health Report',
+      freq:'Monthly',
+      purpose:'Report overall response rates, open escalations, and program health versus targets',
+      delivers:`Response rate: ${rate}% vs 85% target · ${esc} open escalation${esc!==1?'s':''} · ${total} total suppliers · Gap analysis and recommended actions`,
+      status:'Active',
+      alert: rate<85?'br':'bg'
+    },
+    {
+      who:'Sourcing and Category Managers',
+      type:'Weekly Escalation Review',
+      freq:'Weekly',
+      purpose:'Align on escalated suppliers requiring direct category manager intervention this week',
+      delivers:`${esc} escalated supplier${esc!==1?'s':''}: ${suppliers.filter(s=>s.status==='Escalated').map(s=>s.name).join(', ')||'None this week'} · Days overdue and recommended next actions`,
+      status:'Active',
+      alert: esc>0?'br':'bg'
+    },
+    {
+      who:'Compliance Team',
+      type:'Pre-Campaign Alignment',
+      freq:'Before each compliance campaign',
+      purpose:'Confirm data requirements, regulatory deadlines, and submission format before campaign launches',
+      delivers:`Campaign brief: "${campName}" · Due ${campDue} · ${total} target suppliers · Data template and submission instructions`,
+      status:'Active',
+      alert:'bg'
+    },
+    {
+      who:'Supplier Quality Engineering',
+      type:'Corrective Action Review',
+      freq:'Bi-weekly',
+      purpose:'Review open corrective actions and agree on escalation decisions for non-responsive suppliers',
+      delivers:`Open corrective actions by supplier · Days outstanding · Escalation recommendation for Watch List: ${wl} supplier${wl!==1?'s':''}`,
+      status:'Active',
+      alert: wl>0?'ba':'bg'
+    },
+    {
+      who:'IT and Data Team',
+      type:'System and Data Review',
+      freq:'Monthly',
+      purpose:'Review portal registrations, contact data completeness, and any system or portal issues',
+      delivers:`Contact health report · ${noEmail} missing email${noEmail!==1?'s':''} · ${noPotal} portal registrations incomplete · Bounce detection report`,
+      status:'Active',
+      alert: noEmail>0?'ba':'bg'
+    },
+    {
+      who:'Finance Team',
+      type:'CBAM and Cost Impact Brief',
+      freq:'Quarterly',
+      purpose:'Share carbon cost exposure from CBAM compliance data collected across the supply base',
+      delivers:`CBAM cost liability estimate by supplier and region · CO2 data completeness status · Sourcing scenario analysis by region`,
+      status:'Active',
+      alert:'bg'
+    },
   ];
+
   document.getElementById('stakeholder-tbody').innerHTML=cadence.map(c=>`<tr>
-    <td><strong style="font-size:12px;color:var(--navy)">${c.who}</strong></td>
-    <td style="font-size:11px;color:var(--teal);font-weight:500">${c.type}</td>
+    <td>
+      <strong style="font-size:12px;color:var(--navy)">${c.who}</strong>
+      <div style="font-size:10px;color:var(--text3);margin-top:2px">${c.type}</div>
+    </td>
     <td><span class="badge bt" style="font-size:10px">${c.freq}</span></td>
     <td style="font-size:11px;color:var(--text2)">${c.purpose}</td>
-    <td style="font-size:11px">${c.delivers}</td>
-    <td><span class="badge bg">${c.status}</span></td>
+    <td style="font-size:11px">
+      <div style="background:${c.alert==='br'?'var(--redbg)':c.alert==='ba'?'var(--amberbg)':'var(--greenbg)'};color:${c.alert==='br'?'var(--redtext)':c.alert==='ba'?'var(--ambertext)':'var(--greentext)'};border-radius:5px;padding:6px 8px;line-height:1.5">${c.delivers}</div>
+    </td>
+    <td><span class="badge ${c.alert==='br'?'br':c.alert==='ba'?'ba':'bg'}">${c.status}</span></td>
   </tr>`).join('');
 
   const flows=[
-    {team:'Sourcing Team',provides:'Supplier list with spend data and tier classification',when:'Annually and when new suppliers added',used:'REI scoring and segmentation'},
-    {team:'Compliance Team',provides:'Regulatory deadlines, data requirements, submission format',when:'Before each compliance campaign',used:'Campaign design and template creation'},
-    {team:'Finance Team',provides:'CBAM liability calculations and EU shipment volumes',when:'Quarterly',used:'Compliance campaign targeting and cost validation'},
-    {team:'Supplier Quality Eng',provides:'Quality rejection rates and delivery failure data',when:'Monthly',used:'Watch list updates and corrective action campaign triggers'},
-    {team:'IT Team',provides:'Portal registration status, bounce reports, system issues',when:'Monthly',used:'Contact health tracker and supplier master updates'},
-    {team:'Category Managers',provides:'Escalation resolution outcomes and supplier commitments',when:'After each escalation',used:'Escalation log closure and supplier status updates'},
+    {team:'Sourcing Team',provides:`Supplier list with spend data and tier classification · Current: ${total} suppliers`,when:'Annually + when new suppliers added',used:'REI scoring and segmentation in REI Scoring tab'},
+    {team:'Compliance Team',provides:'Regulatory deadlines, data requirements, and submission format for each campaign',when:'Before each compliance campaign',used:'Campaign Calendar design and email template creation'},
+    {team:'Finance Team',provides:'CBAM liability calculations and EU shipment volumes by supplier',when:'Quarterly',used:'Compliance campaign targeting and carbon cost validation'},
+    {team:'Supplier Quality Eng',provides:`Quality rejection rates and delivery failure data · Watch List triggers: ${wl} supplier${wl!==1?'s':''} flagged`,when:'Monthly',used:'Watch List updates and corrective action campaign triggers'},
+    {team:'IT Team',provides:`Portal registration status · ${noPotal} pending · Bounce detection reports · ${noEmail} missing email${noEmail!==1?'s':''}`,when:'Monthly',used:'Contact health tracker and supplier master updates'},
+    {team:'Category Managers',provides:`Escalation resolution outcomes · ${esc} open escalation${esc!==1?'s':''} · Supplier commitments and next steps`,when:'After each escalation',used:'Escalation log closure and supplier status updates in Campaign Tracker'},
   ];
+
   document.getElementById('infoflow-tbody').innerHTML=flows.map(f=>`<tr>
     <td><strong style="font-size:12px;color:var(--navy)">${f.team}</strong></td>
     <td style="font-size:11px">${f.provides}</td>
-    <td><span class="badge bt" style="font-size:10px">${f.when}</span></td>
+    <td><span class="badge bt" style="font-size:10px;white-space:nowrap">${f.when}</span></td>
     <td style="font-size:11px;color:var(--text2)">${f.used}</td>
   </tr>`).join('');
 }
 
 function buildCompliance(){
+  const typeColors={
+    'Regulatory Compliance':{fg:'#1D4ED8',bg:'#EFF6FF'},
+    'Risk and Financial Health':{fg:'#065F46',bg:'#F0FDF4'},
+    'Performance and Corrective Action':{fg:'#B45309',bg:'#FFFBEB'},
+    'Contact and Master Data':{fg:'#7C3AED',bg:'#FDF4FF'},
+  };
   const camps=[
-    {name:'CO2 Emissions Collection',type:'Regulatory Compliance',freq:'Quarterly · All active suppliers · Due Jun 30',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',prog:78,submitted:661,pending:186,escalated:8,status:'In progress'},
-    {name:'CBAM Certificate Collection',type:'Regulatory Compliance',freq:'Quarterly · EU-bound suppliers · Due Jun 30',desc:'Collect CBAM certificates for all steel and aluminum imports to EU facilities',prog:82,submitted:312,pending:68,escalated:3,status:'In progress'},
-    {name:'Conflict Minerals (CMRT)',type:'Regulatory Compliance',freq:'Annual Q1 · All Tier 1 and Tier 2',desc:'Dodd-Frank Section 1502 — tantalum, tin, tungsten, gold reporting',prog:94,submitted:452,pending:29,escalated:0,status:'Completed'},
-    {name:'Substance Compliance (RoHS/REACH)',type:'Regulatory Compliance',freq:'Annual Q2 · Regulated material suppliers',desc:'EU RoHS and REACH substance declarations for regulated components',prog:5,submitted:0,pending:380,escalated:0,status:'Scheduled'},
+    {name:'CO2 Emissions Collection',type:'Regulatory Compliance',freq:'Quarterly - All active suppliers - Due Jun 30',desc:'Collect CO2 emissions data per part number for Scope 3 regulatory reporting',prog:78,submitted:661,pending:186,escalated:8,status:'In progress'},
+    {name:'CBAM Certificate Collection',type:'Regulatory Compliance',freq:'Quarterly - EU-bound suppliers - Due Jun 30',desc:'Collect CBAM certificates for all steel and aluminum imports to EU facilities',prog:82,submitted:312,pending:68,escalated:3,status:'In progress'},
+    {name:'Conflict Minerals (CMRT)',type:'Regulatory Compliance',freq:'Annual Q1 - All Tier 1 and Tier 2',desc:'Dodd-Frank Section 1502 reporting for tantalum, tin, tungsten, and gold',prog:94,submitted:452,pending:29,escalated:0,status:'Completed'},
+    {name:'Substance Compliance RoHS/REACH',type:'Regulatory Compliance',freq:'Annual Q2 - Regulated material suppliers',desc:'EU RoHS and REACH substance declarations for regulated components',prog:5,submitted:0,pending:380,escalated:0,status:'Scheduled'},
+    {name:'Annual Supplier Risk Assessment',type:'Risk and Financial Health',freq:'Annual Q3 - All P1 and P2 suppliers',desc:'Collect REI inputs (TTR/TTS), financial health indicators, business continuity plans, and sub-tier visibility',prog:0,submitted:0,pending:8,escalated:0,status:'Scheduled'},
+    {name:'Business Continuity Assessment',type:'Risk and Financial Health',freq:'Annual Q2 - P1 and single-source suppliers',desc:'Confirm BCP status, disaster recovery readiness, and alternate sourcing options for critical suppliers',prog:65,submitted:5,pending:3,escalated:0,status:'In progress'},
+    {name:'Sub-tier Supplier Visibility',type:'Risk and Financial Health',freq:'Annual Q4 - Critical commodity Tier 1',desc:'Map sub-tier suppliers for components critical to production and identify single-source dependencies',prog:0,submitted:0,pending:12,escalated:0,status:'Scheduled'},
+    {name:'Corrective Action - Quality',type:'Performance and Corrective Action',freq:'Event-triggered - Suppliers with reject rate above 2%',desc:'Root cause analysis, corrective action plan with target dates, and evidence of measures taken',prog:100,submitted:3,pending:0,escalated:0,status:'Completed'},
+    {name:'Corrective Action - Delivery',type:'Performance and Corrective Action',freq:'Event-triggered - Suppliers with 2 or more late deliveries',desc:'Delivery improvement plan, root cause analysis, and confirmed commitment dates from supplier',prog:50,submitted:1,pending:1,escalated:0,status:'In progress'},
+    {name:'Contact Verification',type:'Contact and Master Data',freq:'Semi-annual Q1 and Q3 - Full supply base',desc:'Verify primary and backup contacts, confirm email addresses are valid and active',prog:88,submitted:13,pending:1,escalated:1,status:'In progress'},
+    {name:'Supplier Code of Conduct',type:'Contact and Master Data',freq:'Annual Q1 - All active suppliers',desc:'Collect signed code of conduct acknowledgment from all active suppliers',prog:100,submitted:15,pending:0,escalated:0,status:'Completed'},
+    {name:'Portal Registration',type:'Contact and Master Data',freq:'Ongoing - New onboarding suppliers',desc:'Ensure all active suppliers are registered in portal with validated login and contact details',prog:73,submitted:11,pending:4,escalated:0,status:'In progress'},
   ];
   const statusBadge={'In progress':'ba','Completed':'bg','Scheduled':'bb'};
-  document.getElementById('compliance-cards').innerHTML=camps.map(c=>`
-    <div class="comp-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div><div style="font-size:13px;font-weight:500;color:var(--bluetext)">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.freq}</div></div>
-        <span class="badge ${statusBadge[c.status]}">${c.status}</span>
+  const types=['Regulatory Compliance','Risk and Financial Health','Performance and Corrective Action','Contact and Master Data'];
+  let html='';
+  types.forEach(type=>{
+    const{fg,bg}=typeColors[type];
+    const tc=camps.filter(c=>c.type===type);
+    html+=`<div style="margin-bottom:1.25rem;grid-column:1/-1">
+      <div style="background:${fg};color:#fff;padding:8px 14px;border-radius:8px 8px 0 0;font-size:11px;font-weight:600;display:flex;justify-content:space-between">
+        <span>${type}</span>
+        <span style="opacity:0.8;font-size:10px">${tc.filter(c=>c.status==='In progress').length} active - ${tc.filter(c=>c.status==='Completed').length} completed - ${tc.filter(c=>c.status==='Scheduled').length} scheduled</span>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${c.desc}</div>
-      <div class="prog-bar"><div class="prog-fill" style="width:${c.prog}%;background:${c.prog>=80?'var(--green)':c.prog>=50?'var(--amber)':'var(--blue)'}"></div></div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:10px">${c.prog}% submitted</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;border-top:0.5px solid var(--border);padding-top:10px">
-        <div><div style="font-size:15px;font-weight:500;color:var(--green)">${c.submitted}</div><div style="font-size:9px;color:var(--text2)">Submitted</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:var(--amber)">${c.pending}</div><div style="font-size:9px;color:var(--text2)">Pending</div></div>
-        <div><div style="font-size:15px;font-weight:500;color:${c.escalated>0?'var(--red)':'var(--green)'}">${c.escalated}</div><div style="font-size:9px;color:var(--text2)">Escalated</div></div>
+      <div style="border:0.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        ${tc.map((c,i)=>`<div style="padding:12px 14px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border)">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+            <div style="font-size:12px;font-weight:500;color:${fg};flex:1">${c.name}</div>
+            <span class="badge ${statusBadge[c.status]}" style="font-size:10px;margin-left:6px;flex-shrink:0">${c.status}</span>
+          </div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:5px">${c.freq}</div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.5">${c.desc}</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${c.prog}%;background:${c.prog>=80?'var(--green)':c.prog>=50?'var(--amber)':'var(--blue)'}"></div></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px;text-align:center">
+            <div style="background:var(--greenbg);border-radius:4px;padding:4px"><div style="font-size:13px;font-weight:500;color:var(--greentext)">${c.submitted}</div><div style="font-size:9px;color:var(--greentext)">Submitted</div></div>
+            <div style="background:var(--amberbg);border-radius:4px;padding:4px"><div style="font-size:13px;font-weight:500;color:var(--ambertext)">${c.pending}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
+            <div style="background:${c.escalated>0?'var(--redbg)':'var(--bg2)'};border-radius:4px;padding:4px"><div style="font-size:13px;font-weight:500;color:${c.escalated>0?'var(--redtext)':'var(--text3)'}">${c.escalated}</div><div style="font-size:9px;color:${c.escalated>0?'var(--redtext)':'var(--text3)'}">Escalated</div></div>
+          </div>
+        </div>`).join('')}
       </div>
-    </div>`).join('');
+    </div>`;
+  });
+  document.getElementById('compliance-cards').innerHTML=html;
 }
-
-// ═══════════════════════════════════════════════
-// LIVE DATA RENDERERS
-// ═══════════════════════════════════════════════
 function updateMetrics(){
   const total=suppliers.length,resp=suppliers.filter(s=>s.status==='Responded').length;
   const pend=suppliers.filter(s=>s.status==='Pending').length,esc=suppliers.filter(s=>s.status==='Escalated').length;
@@ -1229,6 +1373,17 @@ function renderEsc(){
 // ═══════════════════════════════════════════════
 // USER ACTIONS
 // ═══════════════════════════════════════════════
+function updateCampStatus(campIdx,supplierIdx,val){
+  if(!campaigns[campIdx].supplierStatuses) campaigns[campIdx].supplierStatuses={};
+  const name=suppliers[supplierIdx].name;
+  const old=campaigns[campIdx].supplierStatuses[name]||'Pending';
+  campaigns[campIdx].supplierStatuses[name]=val;
+  // Also update global status for campaign 1 (main compliance tracker)
+  if(campIdx===0) suppliers[supplierIdx].status=val;
+  activity.unshift({msg:`[${campaigns[campIdx].name.split('—')[0].trim()}] ${name}: ${old} to ${val}`,color:val==='Responded'?'#639922':val==='Escalated'?'#E24B4A':'#BA7517',time:new Date().toLocaleString()});
+  renderAll();
+}
+
 function updateStatus(i,val){
   const old=suppliers[i].status;
   suppliers[i].status=val;
@@ -1310,6 +1465,43 @@ function showPage(n,el){
   setTimeout(updateCharts,80);
 }
 
+function renderGovTable(){
+  const el=document.getElementById('gov-tbody');if(!el)return;
+  if(!suppliers.length){
+    el.innerHTML='<tr><td colspan="7"><div class="empty" style="padding:1.5rem"><i class="ti ti-address-book"></i><p>No suppliers yet. Add suppliers in REI Scoring to populate contact health tracker.</p></div></td></tr>';
+    return;
+  }
+  // Last verified stored per supplier, default based on segment priority
+  el.innerHTML=suppliers.map((s,i)=>{
+    const{bg,fg}=SEG[s.segment]||{bg:'#fff',fg:'#333'};
+    const hasEmail=!!s.email;
+    const isBouncing=!hasEmail;
+    const emailStatus=isBouncing?'MISSING':'Verified';
+    const eBg=isBouncing?'var(--redbg)':'var(--greenbg)';
+    const eFg=isBouncing?'var(--redtext)':'var(--greentext)';
+    // Determine action
+    let action='None';
+    if(isBouncing&&s.segment==='Watch List')action='URGENT: find valid email via category manager';
+    else if(isBouncing)action='Update email address in Supplier Master';
+    else if(s.portal==='Not Registered')action='Complete portal registration';
+    else if(s.portal==='Pending')action='Follow up on portal registration';
+    const aBg=action.includes('URGENT')?'var(--redbg)':action!=='None'?'var(--amberbg)':'var(--greenbg)';
+    const aFg=action.includes('URGENT')?'var(--redtext)':action!=='None'?'var(--ambertext)':'var(--greentext)';
+    // Last verified and next review — editable inputs
+    const lastVerified=s.lastVerified||'2026-03-01';
+    const nextReview=s.nextReview||'2026-09-01';
+    return `<tr>
+      <td><strong style="font-size:12px">${s.name}</strong><div style="font-size:10px;color:var(--text3)">${s.region} · ${s.tier}</div></td>
+      <td><span class="badge" style="background:${bg};color:${fg}">${s.segment}</span></td>
+      <td><input type="date" value="${lastVerified}" style="font-size:10px;padding:3px 6px;width:120px" onchange="suppliers[${i}].lastVerified=this.value;renderGovTable()" title="Click to update last verified date"></td>
+      <td><input type="date" value="${nextReview}" style="font-size:10px;padding:3px 6px;width:120px" onchange="suppliers[${i}].nextReview=this.value;renderGovTable()" title="Click to update next review date"></td>
+      <td style="background:${eBg};color:${eFg};font-weight:600;font-size:11px">${emailStatus}<div style="font-size:9px;margin-top:2px">${s.email||'No email on file'}</div></td>
+      <td><span class="badge" style="background:${s.portal==='Registered'?'var(--greenbg)':s.portal==='Pending'?'var(--amberbg)':'var(--redbg)'};color:${s.portal==='Registered'?'var(--greentext)':s.portal==='Pending'?'var(--ambertext)':'var(--redtext)'}">${s.portal||'Unknown'}</span></td>
+      <td style="background:${aBg};color:${aFg};font-weight:${action.includes('URGENT')?'700':'400'};font-size:11px">${action}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderAll(){
   updateMetrics();
   renderREI();
@@ -1318,6 +1510,8 @@ function renderAll(){
   renderEsc();
   renderActivity();
   updateGap();
+  renderGovTable();
+  renderStakeholder();
 }
 
 // ═══════════════════════════════════════════════
