@@ -218,9 +218,8 @@ Built a semi-automated CBAM compliance tool for Nexteer Automotive (Kearney cons
 
 ## About
 
-**Tejaswi Sreerama** -- Supply Chain Program Manager
-12 years automotive engineering experience | MSCM, University of Michigan Ross School of Business, 2026
-First Place, ISM Global Case Competition 2026
+**Tejaswi Sreerama** | Automotive engineer transitioning into sourcing and program management
+12 years of experience across interior components, BEV programs, and supplier development | MSCM, University of Michigan Ross School of Business, 2026 | First Place, ISM Global Case Competition 2026
 
 - Email: tejaswismandadi@gmail.com
 - LinkedIn: [linkedin.com/in/tejaswisreerama](https://linkedin.com/in/tejaswisreerama)
