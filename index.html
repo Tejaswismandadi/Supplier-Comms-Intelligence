@@ -141,6 +141,39 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal)}
 </style>
 <script>
 function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.classList.remove('open');el.style.display='';}}
+
+// Storage helpers
+function saveToStorage(){
+  try{
+    localStorage.setItem('sci_suppliers', JSON.stringify(suppliers));
+    localStorage.setItem('sci_campaigns', JSON.stringify(campaigns));
+    localStorage.setItem('sci_activity', JSON.stringify(activity));
+    localStorage.setItem('sci_saved_at', new Date().toLocaleString());
+  }catch(e){console.warn('Storage save failed:', e);}
+}
+
+function loadFromStorage(){
+  try{
+    const s=localStorage.getItem('sci_suppliers');
+    const c=localStorage.getItem('sci_campaigns');
+    const a=localStorage.getItem('sci_activity');
+    if(s) suppliers=JSON.parse(s);
+    if(c) campaigns=JSON.parse(c);
+    if(a) activity=JSON.parse(a);
+    return !!(s||c);
+  }catch(e){console.warn('Storage load failed:', e);return false;}
+}
+
+function clearStorage(){
+  localStorage.removeItem('sci_suppliers');
+  localStorage.removeItem('sci_campaigns');
+  localStorage.removeItem('sci_activity');
+  localStorage.removeItem('sci_saved_at');
+}
+
+function getSavedAt(){
+  return localStorage.getItem('sci_saved_at')||null;
+}
 </script>
 </head>
 <body>
@@ -153,7 +186,7 @@ function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.clas
       <div class="brand-sub" id="topbar-sub">15 suppliers · 1 active campaign</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px"><span id="save-indicator" style="font-size:10px;color:var(--text3)"></span>
     <button class="btn" id="demo-btn" onclick="toggleDemo()" style="font-size:11px;background:var(--greenbg);color:var(--greentext);border-color:var(--green)"><i class="ti ti-circle-check" style="font-size:10px"></i> Demo mode — click to clear</button>
     <button class="btn" onclick="openModal('welcome')" style="font-size:11px"><i class="ti ti-info-circle"></i> How this works</button>
     <button class="btn primary" onclick="openModal('campaign')"><i class="ti ti-plus"></i> New campaign</button>
@@ -611,6 +644,16 @@ function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.clas
     <div class="card-title">Download sample CSV template</div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Pre-filled with 15 demo suppliers. Replace with your own data and upload.</p>
     <button class="btn" onclick="downloadSample()"><i class="ti ti-download"></i> Download sample CSV</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Export and backup</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Export your current supplier data as a CSV to back up or share. Your data also saves automatically in this browser.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn teal" onclick="exportSuppliers()"><i class="ti ti-download"></i> Export suppliers CSV</button>
+      <button class="btn" onclick="exportCampaigns()"><i class="ti ti-download"></i> Export campaigns JSON</button>
+      <button class="btn danger" onclick="if(confirm('Clear all saved data and reload with demo data?')){clearStorage();location.reload();}"><i class="ti ti-trash"></i> Reset all data</button>
+    </div>
+    <div id="storage-status" style="margin-top:10px;font-size:11px;color:var(--text2)"></div>
   </div>
 </div>
 
@@ -1473,13 +1516,23 @@ Foshan Manufacturing,Asia Pacific,Tier 2,20,1,No,320,Yes,2,Wei Zhang,,Not Regist
 
 function toggleDemo(){
   const btn=document.getElementById('demo-btn');
-  if(suppliers.length>0&&suppliers[0].name==='Bosch GmbH'){
-    if(confirm('Clear demo data and start with your own suppliers?')){
+  const isDemoData=suppliers.length>0&&suppliers[0].name==='Bosch GmbH';
+  const hasSavedData=getSavedAt()!==null;
+  if(isDemoData){
+    if(confirm('Clear demo data and start with your own suppliers? Your data will save automatically.')){
       suppliers=[];campaigns=[];activity=[];
-      if(btn){btn.innerHTML='<i class="ti ti-edit" style="font-size:10px"></i> Live mode — add your suppliers';btn.style.background='var(--bluebg)';btn.style.color='var(--bluetext)';btn.style.borderColor='var(--blue)';}
+      clearStorage();
+      if(btn){btn.innerHTML='<i class="ti ti-edit" style="font-size:10px"></i> Live mode — data saves automatically';btn.style.background='var(--greenbg)';btn.style.color='var(--greentext)';btn.style.borderColor='var(--green)';}
       renderAll();
     }
-  }else{location.reload();}
+  }else if(hasSavedData){
+    if(confirm('Reset to demo data? This will clear all your saved suppliers and campaigns.')){
+      clearStorage();
+      location.reload();
+    }
+  }else{
+    location.reload();
+  }
 }
 
 function openModal(t){const el=document.getElementById('modal-'+t);if(el){el.style.display='';el.classList.add('open');}}
@@ -1531,6 +1584,35 @@ function renderGovTable(){
   }).join('');
 }
 
+function exportSuppliers(){
+  if(!suppliers.length){alert('No suppliers to export');return;}
+  const headers='Name,Region,Tier,TTR,TTS,Single Source,Spend ($K),Financial Risk,Performance,Contact Name,Contact Email,Portal Status,Segment,ESC Window';
+  const rows=suppliers.map(s=>[s.name,s.region,s.tier,s.ttr,s.tts,s.single||'No',s.spend,s.fin||'No',s.perf,s.contact||'',s.email||'',s.portal||'',s.segment,s.esc].join(','));
+  const csv=headers+'\n'+rows.join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='my_suppliers_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+function exportCampaigns(){
+  if(!campaigns.length){alert('No campaigns to export');return;}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(campaigns,null,2)],{type:'application/json'}));
+  a.download='my_campaigns_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+
+function updateStorageStatus(){
+  const el=document.getElementById('storage-status');if(!el)return;
+  const savedAt=getSavedAt();
+  if(savedAt){
+    el.innerHTML='<i class="ti ti-circle-check" style="color:var(--green)"></i> Data saved in this browser · Last saved: '+savedAt+' · '+suppliers.length+' suppliers · '+campaigns.length+' campaigns';
+  }else{
+    el.innerHTML='<i class="ti ti-info-circle" style="color:var(--text3)"></i> No saved data yet. Add suppliers to start saving automatically.';
+  }
+}
+
 function renderAll(){
   updateMetrics();
   renderREI();
@@ -1541,12 +1623,31 @@ function renderAll(){
   updateGap();
   renderGovTable();
   renderStakeholder();
+  // Auto-save to browser storage
+  saveToStorage();
+  // Update save indicator in topbar
+  const si = document.getElementById('save-indicator');
+  if(si) si.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  updateStorageStatus();
 }
 
 // ═══════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════
 window.addEventListener('load',function(){
+  // Check for saved data
+  const hasSaved = loadFromStorage();
+  if(hasSaved){
+    const savedAt = getSavedAt();
+    // Show saved data notification
+    const btn = document.getElementById('demo-btn');
+    if(btn){
+      btn.innerHTML='<i class="ti ti-device-floppy" style="font-size:10px"></i> Data saved '+savedAt+' — click to reset';
+      btn.style.background='var(--bluebg)';
+      btn.style.color='var(--bluetext)';
+      btn.style.borderColor='var(--blue)';
+    }
+  }
   buildCalendar();
   buildRaci();
   buildTimeline();
