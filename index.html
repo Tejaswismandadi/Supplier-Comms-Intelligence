@@ -664,7 +664,7 @@ function closeModal(t){var el=document.getElementById('modal-'+t);if(el){el.clas
   </div>
   <div class="card">
     <div class="card-title">About</div>
-    <p style="font-size:13px;line-height:1.7;color:var(--text2)">Built by <strong style="color:var(--text)">Tejaswi Sreerama</strong> — Supply Chain Program Manager with 12 years of automotive engineering experience and an MSCM from the University of Michigan Ross School of Business (2026). First Place, ISM Global Case Competition 2026.<br><br>
+    <p style="font-size:13px;line-height:1.7;color:var(--text2)">Built by <strong style="color:var(--text)">Tejaswi Sreerama</strong> | Automotive engineer transitioning into sourcing and program management | 12 years of experience across interior components, BEV programs, and supplier development | MSCM, University of Michigan Ross School of Business, 2026 | First Place, ISM Global Case Competition 2026<br><br>
     <a href="mailto:tejaswismandadi@gmail.com" style="color:var(--teal)">tejaswismandadi@gmail.com</a> &nbsp;|&nbsp; <a href="https://linkedin.com/in/tejaswisreerama" style="color:var(--teal)">linkedin.com/in/tejaswisreerama</a> &nbsp;|&nbsp; <a href="https://tejaswismandadi.github.io/Autocost-pro" style="color:var(--teal)">AutoCost Pro</a></p>
   </div>
 </div>
@@ -1315,46 +1315,75 @@ function filterSup(val){renderSup(val==='all'?suppliers:suppliers.filter(s=>s.se
 function renderCampaigns(){
   const el=document.getElementById('campaigns-list');if(!el)return;
   if(!campaigns.length){el.innerHTML='<div class="empty"><i class="ti ti-speakerphone"></i><p>No campaigns yet — click New campaign to start</p></div>';return;}
-  const resp=suppliers.filter(s=>s.status==='Responded').length,total=suppliers.length||1;
-  const rate=Math.round(resp/total*100),pend=suppliers.filter(s=>s.status==='Pending').length,esc=suppliers.filter(s=>s.status==='Escalated').length;
-  el.innerHTML=campaigns.map((c,ci)=>`<div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
-      <div><div style="font-size:14px;font-weight:500">${c.name}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${c.type} · Due ${c.due} · ${c.priority} priority · Created ${c.created}</div>${c.desc?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${c.desc}</div>`:''}</div>
-      <span class="badge ${c.status==='active'?'ba':'bg'}">${c.status==='active'?'In progress':'Completed'}</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-      <div>
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Response rate — target 85%</div>
-        <div class="prog-bar"><div class="prog-fill" style="width:${rate}%;background:${rate>=85?'var(--green)':rate>=60?'var(--amber)':'var(--red)'}"></div></div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px">${rate}% · ${resp} of ${total} suppliers</div>
+
+  const typeColors={'Regulatory Compliance':'#1D4ED8','Risk and Financial Health':'#065F46','Performance and Corrective Action':'#B45309','Contact and Master Data':'#7C3AED'};
+
+  el.innerHTML=campaigns.map((c,ci)=>{
+    // Determine targeted suppliers for this campaign
+    let targeted=[];
+    if(c.targetAll) targeted=suppliers;
+    else if(c.targetSegments) targeted=suppliers.filter(s=>c.targetSegments.includes(s.segment));
+    else if(c.targetSuppliers) targeted=suppliers.filter(s=>c.targetSuppliers.includes(s.name));
+    else targeted=suppliers;
+
+    // Get per-campaign status for each supplier
+    const getSt=(s)=>(c.supplierStatuses&&c.supplierStatuses[s.name])?c.supplierStatuses[s.name]:(c.id===1?s.status:'Pending');
+
+    const total=targeted.length||1;
+    const resp=targeted.filter(s=>getSt(s)==='Responded').length;
+    const pend=targeted.filter(s=>getSt(s)==='Pending').length;
+    const esc=targeted.filter(s=>getSt(s)==='Escalated').length;
+    const rate=Math.round(resp/total*100);
+    const tc=typeColors[c.type]||'#1E3A5F';
+
+    return `<div class="card" style="border-left:3px solid ${tc}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="font-size:14px;font-weight:500">${c.name}</div>
+          <div style="font-size:11px;margin-top:2px"><span style="color:${tc};font-weight:500">${c.type}</span><span style="color:var(--text2)"> · Due ${c.due} · ${c.priority} priority · Created ${c.created}</span></div>
+          ${c.desc?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${c.desc}</div>`:''}
+          <div style="font-size:10px;color:var(--text3);margin-top:3px">Targeting ${targeted.length} supplier${targeted.length!==1?'s':''}: ${targeted.slice(0,4).map(s=>s.name.split(' ')[0]).join(', ')}${targeted.length>4?' and '+(targeted.length-4)+' more':''}</div>
+        </div>
+        <span class="badge ${c.status==='active'?'ba':'bg'}">${c.status==='active'?'In progress':'Completed'}</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">
-        <div style="background:var(--greenbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--greentext)">${resp}</div><div style="font-size:9px;color:var(--greentext)">Responded</div></div>
-        <div style="background:var(--amberbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--ambertext)">${pend}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
-        <div style="background:var(--redbg);border-radius:6px;padding:6px"><div style="font-size:15px;font-weight:600;color:var(--redtext)">${esc}</div><div style="font-size:9px;color:var(--redtext)">Escalated</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:${c.status==='active'?'12px':'0'}">
+        <div>
+          <div style="font-size:11px;color:var(--text2);margin-bottom:3px">Response rate · target 85%</div>
+          <div class="prog-bar"><div class="prog-fill" style="width:${rate}%;background:${rate>=85?'var(--green)':rate>=60?'var(--amber)':'var(--red)'}"></div></div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${rate}% · ${resp} of ${total} supplier${total!==1?'s':''}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;text-align:center">
+          <div style="background:var(--greenbg);border-radius:6px;padding:5px"><div style="font-size:14px;font-weight:600;color:var(--greentext)">${resp}</div><div style="font-size:9px;color:var(--greentext)">Responded</div></div>
+          <div style="background:var(--amberbg);border-radius:6px;padding:5px"><div style="font-size:14px;font-weight:600;color:var(--ambertext)">${pend}</div><div style="font-size:9px;color:var(--ambertext)">Pending</div></div>
+          <div style="background:var(--redbg);border-radius:6px;padding:5px"><div style="font-size:14px;font-weight:600;color:var(--redtext)">${esc}</div><div style="font-size:9px;color:var(--redtext)">Escalated</div></div>
+        </div>
       </div>
-    </div>
-    <div style="border-top:0.5px solid var(--border);padding-top:12px">
-      <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:8px">Update supplier status — change dropdown as suppliers respond. Escalation flags trigger automatically per REI segment window.</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px">
-        ${suppliers.map((s,si)=>{
-          const{fg}=SEG[s.segment]||{fg:'#333'};
-          const sBg=s.status==='Responded'?'var(--greenbg)':s.status==='Escalated'?'var(--redbg)':'var(--amberbg)';
-          const sFg=s.status==='Responded'?'var(--greentext)':s.status==='Escalated'?'var(--redtext)':'var(--ambertext)';
-          return `<div style="display:flex;align-items:center;gap:3px;background:var(--bg2);border-radius:6px;padding:3px 8px 3px 3px">
-            <select onchange="updateStatus(${si},this.value)" style="font-size:10px;padding:2px 4px;background:${sBg};color:${sFg};font-weight:600;border:none;border-radius:4px;width:auto;cursor:pointer">
-              <option ${s.status==='Pending'?'selected':''}>Pending</option>
-              <option ${s.status==='Responded'?'selected':''}>Responded</option>
-              <option ${s.status==='Escalated'?'selected':''}>Escalated</option>
-            </select>
-            <span style="font-size:10px;color:var(--text2)">${s.name.split(' ')[0]}</span>
-            <span style="font-size:9px;color:${fg};font-weight:600">${s.esc}</span>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-  </div>`).join('');
+      ${c.status==='active'?`
+      <div style="border-top:0.5px solid var(--border);padding-top:10px">
+        <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:7px">Update supplier status · Escalation flags trigger automatically per REI segment window</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${targeted.map((s)=>{
+            const{fg}=SEG[s.segment]||{fg:'#333'};
+            const st=getSt(s);
+            const globalIdx=suppliers.indexOf(s);
+            const sBg=st==='Responded'?'var(--greenbg)':st==='Escalated'?'var(--redbg)':'var(--amberbg)';
+            const sFg=st==='Responded'?'var(--greentext)':st==='Escalated'?'var(--redtext)':'var(--ambertext)';
+            return `<div style="display:flex;align-items:center;gap:3px;background:var(--bg2);border-radius:6px;padding:3px 8px 3px 3px">
+              <select onchange="updateCampStatus(${ci},${globalIdx},this.value)" style="font-size:10px;padding:2px 4px;background:${sBg};color:${sFg};font-weight:600;border:none;border-radius:4px;width:auto;cursor:pointer">
+                <option ${st==='Pending'?'selected':''}>Pending</option>
+                <option ${st==='Responded'?'selected':''}>Responded</option>
+                <option ${st==='Escalated'?'selected':''}>Escalated</option>
+              </select>
+              <span style="font-size:10px;color:var(--text2)">${s.name.split(' ')[0]}</span>
+              <span style="font-size:9px;color:${fg};font-weight:600">${s.esc}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`:''}
+    </div>`;
+  }).join('');
 }
+
 
 function renderEsc(){
   const el=document.getElementById('esc-list');if(!el)return;
